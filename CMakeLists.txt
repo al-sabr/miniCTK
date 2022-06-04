@@ -652,9 +652,9 @@ set(CTK_ENABLED_APPS ${_enabled_apps} CACHE INTERNAL "" FORCE)
 # Plugins in the list below are not build by default
 set(blueberry_core_plugin_list
   org.blueberry.core.runtime
-  org.blueberry.core.jobs
-  org.blueberry.core.expressions
-  org.blueberry.core.commands
+  #org.blueberry.core.jobs
+  #org.blueberry.core.expressions
+  #org.blueberry.core.commands
   #org.blueberry.test
   )
 
@@ -1087,7 +1087,6 @@ include(Utilities/KWStyle/KWStyle.cmake)
 # the end of the whole configuration process, as a "last step".
 # This directory is typically the last SUBDIRS in the main CMakeLists.txt.
 add_subdirectory(CMake/LastConfigureStep)
-add_subdirectory(Utilities/mbilog)
 
 if(DEFINED Qt5_DIR)
   set(MITK_USE_Qt5 TRUE)

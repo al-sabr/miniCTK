@@ -61,6 +61,11 @@ if(NOT DEFINED CTK_DEPENDENCIES)
   message(FATAL_ERROR "error: CTK_DEPENDENCIES variable is not defined !")
 endif()
 
+set(ITK_enabling_variable mbilog)
+set(${ITK_enabling_variable}_LIBRARY_DIRS mbilog_LIBRARY_DIRS)
+set(${ITK_enabling_variable}_INCLUDE_DIRS mbilog_INCLUDE_DIRS)
+set(${ITK_enabling_variable}_FIND_PACKAGE_CMD mbilog)
+
 set(DCMTK_enabling_variable DCMTK_LIBRARIES)
 set(${DCMTK_enabling_variable}_INCLUDE_DIRS DCMTK_INCLUDE_DIR)
 set(${DCMTK_enabling_variable}_FIND_PACKAGE_CMD DCMTK)
