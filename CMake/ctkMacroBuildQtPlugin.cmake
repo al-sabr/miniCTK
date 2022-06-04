@@ -136,8 +136,12 @@ macro(ctkMacroBuildQtPlugin)
   string(REGEX REPLACE "(.*)Plugin[s]?" "\\1" label ${lib_name})
 
   # Apply properties to the library target.
+  set(compile_flags "-DQT_PLUGIN")
+  if(CTK_QT_VERSION VERSION_GREATER "4")
+    set(compile_flags "${compile_flags} -DHAVE_QT5")
+  endif()
   set_target_properties(${lib_name}  PROPERTIES
-    COMPILE_FLAGS "-DQT_PLUGIN"
+    COMPILE_FLAGS "${compile_flags}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${MY_PLUGIN_DIR}"
     LABELS ${label}
     )
@@ -187,7 +191,7 @@ endmacro()
 
 macro(ctkMacroBuildQtDesignerPlugin)
   if(CTK_QT_VERSION VERSION_GREATER "4")
-    find_package(Qt5Designer REQUIRED)
+    find_package(Qt5 COMPONENTS Designer REQUIRED)
     add_definitions(${Qt5Designer_DEFINITIONS})
     include_directories(${Qt5Designer_INCLUDE_DIRS})
   endif()
