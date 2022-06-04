@@ -5,3 +5,5 @@ set(mbilog_TARGET "mbilog")
 set(mbilog_DEPENDS "")
 set(mbilog_PACKAGE_DEPENDS "")
 set(mbilog_LIBRARY_DIRS "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@")
+
+include("${CMAKE_CURRENT_LIST_DIR}/mbilogTargets.cmake")
