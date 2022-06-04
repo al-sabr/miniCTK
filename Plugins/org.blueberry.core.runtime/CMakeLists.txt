@@ -1,8 +1,15 @@
 project(org_blueberry_core_runtime)
 
+set(CMAKE_AUTOMOC ON)
+
 include(files.cmake)
 
 set(QT_USE_QTXML 1)
+
+find_package(Qt5 COMPONENTS Core Gui Widgets Xml)
+find_package(mbilog REQUIRED)
+
+message("mbilog_INCLUDE_DIRS = ${mbilog_INCLUDE_DIRS}")
 
 include_directories(
     src
@@ -10,7 +17,7 @@ include_directories(
     src/dynamichelpers
     src/internal
     src/registry
-    /Users/gxj/sagittarius/sagittarius/bld/CMakeExternals/Install/include
+    #${mbilog_INCLUDE_DIRS}
     )
 
 message(STATUS "Blueberry include: ${CMAKE_BINARY_DIR}/CMakeExternals/Install/include")
@@ -41,7 +48,6 @@ set(PLUGIN_CACHED_RESOURCEFILES
 #Compute the plugin dependencies
 ctkFunctionGetTargetLibraries(PLUGIN_target_libraries)
 
-
 ctkMacroBuildPlugin(
   NAME ${PROJECT_NAME}
   EXPORT_DIRECTIVE ${PLUGIN_export_directive}
@@ -51,6 +57,13 @@ ctkMacroBuildPlugin(
   RESOURCES ${PLUGIN_resources}
   CACHED_RESOURCEFILES ${PLUGIN_CACHED_RESOURCEFILES}
   TARGET_LIBRARIES ${PLUGIN_target_libraries}
+  EXPORTED_INCLUDE_SUFFIXES
+    src
+    src/application
+    src/dynamichelpers
+    src/registry
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/berryConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/berryConfig.h" @ONLY)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Xml mbilog)
