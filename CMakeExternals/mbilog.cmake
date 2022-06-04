@@ -24,7 +24,7 @@ endif()
 
 if(NOT DEFINED mbilog_DIR)
 
-  set(revision_tag v.1.0.0)
+  set(revision_tag v.1.0.1)
   if(${proj}_REVISION_TAG)
     set(revision_tag ${${proj}_REVISION_TAG})
   endif()
