@@ -24,7 +24,7 @@ endif()
 
 if(NOT DEFINED mbilog_DIR)
 
-  set(revision_tag latest)
+  set(revision_tag v.1.0.0)
   if(${proj}_REVISION_TAG)
     set(revision_tag ${${proj}_REVISION_TAG})
   endif()
@@ -50,8 +50,6 @@ if(NOT DEFINED mbilog_DIR)
     CMAKE_CACHE_ARGS
       ${ep_common_cache_args}
       -DBUILD_SHARED_LIBS:BOOL=ON
-      -Dmbilog_BUILD_DEVICES:BOOL=ON
-      -Dmbilog_BUILD_PERFORMANCE_TESTS:BOOL=ON
      DEPENDS
       ${${proj}_DEPENDENCIES}
     )
