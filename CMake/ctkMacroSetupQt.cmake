@@ -43,7 +43,11 @@ macro(ctkMacroSetupQt)
       list(APPEND CTK_QT5_COMPONENTS Script)
     endif()
     find_package(Qt5 COMPONENTS ${CTK_QT5_COMPONENTS} REQUIRED)
-  else()
+
+    if(NOT Qt5_DIR)
+      message(FATAL_ERROR "error: Qt5 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
+    endif()
+  elseif(CTK_QT_VERSION VERSION_LESS "5")
     set(minimum_required_qt_version "4.6")
 
     find_package(Qt4)
@@ -71,10 +75,7 @@ macro(ctkMacroSetupQt)
 
     else()
       message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
-    endif()
-
-  else()
-    message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
+    endif()   
   endif()
 
   mark_as_superbuild(CTK_QT_VERSION)
