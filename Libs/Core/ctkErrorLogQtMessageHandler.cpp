@@ -67,7 +67,11 @@ void ctkErrorLogModelQtMessageOutput(QtMsgType type, const QMessageLogContext& c
   ctkErrorLogQtMessageHandler_CurrentRecursionDepth.ref();
   // Allow a couple of recursion levels to get a hint about where and why recursion occurs,
   // so we stop processing the message if recursion depth is over 10.
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+  if (ctkErrorLogQtMessageHandler_CurrentRecursionDepth.loadRelaxed() > 10)
+#else
   if (ctkErrorLogQtMessageHandler_CurrentRecursionDepth.load() > 10)
+#endif
     {
     ctkErrorLogQtMessageHandler_CurrentRecursionDepth.deref();
     return;
@@ -86,6 +90,12 @@ void ctkErrorLogModelQtMessageOutput(QtMsgType type, const QMessageLogContext& c
     {
     level = ctkErrorLogLevel::Debug;
     }
+#if QT_VERSION >= QT_VERSION_CHECK(5,5,0)
+  else if (type == QtInfoMsg)
+    {
+    level = ctkErrorLogLevel::Info;
+    }
+#endif
   else if (type == QtWarningMsg)
     {
     level = ctkErrorLogLevel::Warning;

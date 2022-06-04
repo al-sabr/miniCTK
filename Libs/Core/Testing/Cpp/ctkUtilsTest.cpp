@@ -41,6 +41,12 @@ private slots:
 
   void testSignificantDecimals();
   void testSignificantDecimals_data();
+
+  void testQStringListToQSet();
+  void testQStringListToQSet_data();
+
+  void testQSetToQStringList();
+  void testQSetToQStringList_data();
 };
 
 // ----------------------------------------------------------------------------
@@ -250,7 +256,54 @@ void ctkUtilsTester::testSignificantDecimals_data()
 }
 
 // ----------------------------------------------------------------------------
+void ctkUtilsTester::testQStringListToQSet()
+{
+  QFETCH(QStringList, input);
+  QFETCH(QSet<QString>, output);
+
+  QCOMPARE(ctk::qStringListToQSet(input), output);
+}
+
+// ----------------------------------------------------------------------------
+void ctkUtilsTester::testQStringListToQSet_data()
+{
+  QTest::addColumn<QStringList>("input");
+  QTest::addColumn< QSet<QString> >("output");
+
+  QTest::newRow("0")
+      << (QStringList() << "foo" << "bar" << "foo")
+      << (QSet<QString>() << "foo" << "bar");
+}
+
+// ----------------------------------------------------------------------------
+void ctkUtilsTester::testQSetToQStringList()
+{
+  QFETCH(QSet<QString>, input);
+  QFETCH(QStringList, output);
+
+  QStringList current = ctk::qSetToQStringList(input);
+  current.sort();
+
+  QCOMPARE(current, output);
+}
+
+// ----------------------------------------------------------------------------
+void ctkUtilsTester::testQSetToQStringList_data()
+{
+  QTest::addColumn< QSet<QString> >("input");
+  QTest::addColumn< QStringList >("output");
+
+  QTest::newRow("0")
+      << (QSet<QString>() << "foo" << "bar")
+      << (QStringList() << "bar" << "foo");
+}
+
+// ----------------------------------------------------------------------------
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+Q_DECLARE_METATYPE (QSet<QString>)
+#endif
+
+// ----------------------------------------------------------------------------
 CTK_TEST_MAIN(ctkUtilsTest)
 #include "moc_ctkUtilsTest.cpp"
-
 
