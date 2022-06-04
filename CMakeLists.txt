@@ -651,7 +651,7 @@ set(CTK_ENABLED_APPS ${_enabled_apps} CACHE INTERNAL "" FORCE)
 
 # Plugins in the list below are not build by default
 set(blueberry_core_plugin_list
-  org.blueberry.core.runtime
+  #org.blueberry.core.runtime
   #org.blueberry.core.jobs
   #org.blueberry.core.expressions
   #org.blueberry.core.commands
@@ -877,6 +877,7 @@ endif()
 set(CTK_DEPENDENCIES
   #Poco
   QtTesting
+  mbilog
   )
 
 if(CTK_USE_KWSTYLE)

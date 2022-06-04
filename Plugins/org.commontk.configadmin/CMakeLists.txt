@@ -61,6 +61,7 @@ ctkMacroBuildPlugin(
   TARGET_LIBRARIES ${PLUGIN_target_libraries}
 )
 
+#target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Widgets Qt5::LinguistTools)
 # Testing
 if(BUILD_TESTING)
   add_subdirectory(Testing)
