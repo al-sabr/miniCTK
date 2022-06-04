@@ -50,6 +50,7 @@ include(mitkFunctionInstallExternalCMakeProject)
 include(mitkFunctionCreateModule)
 include(mitkFunctionUseModules)
 include(mitkFunctionCheckModuleDependencies)
+include(mitkFunctionOrganizeSources)
 #-----------------------------------------------------------------------------
 if(APPLE)
   # Note: By setting CMAKE_OSX_* variables before any enable_language() or project() calls,
@@ -645,6 +646,27 @@ endforeach()
 set(CTK_ENABLED_APPS ${_enabled_apps} CACHE INTERNAL "" FORCE)
 
 #-----------------------------------------------------------------------------
+# BlueBerry Plugins - none of them is build by default
+#
+
+# Plugins in the list below are not build by default
+set(blueberry_core_plugin_list
+  org.blueberry.core.runtime
+  org.blueberry.core.jobs
+  org.blueberry.core.expressions
+  org.blueberry.core.commands
+  #org.blueberry.test
+  )
+
+set(blueberry_ui_plugin_list
+  #org.blueberry.ui.qt
+  #org.blueberry.ui.qt.help
+  #org.blueberry.ui.qt.log
+  #org.blueberry.ui.qt.objectinspector
+  #org.blueberry.uitest
+  )
+
+#-----------------------------------------------------------------------------
 # CTK Plugins - none of them is build by default
 #
 
@@ -654,13 +676,14 @@ set(plugin_list
   org.commontk.eventadmin
   org.commontk.log
   org.commontk.metatype
-  org.blueberry.core.runtime
-  org.blueberry.ui.qt
   )
 
 if(CTK_QT_VERSION VERSION_LESS "5")
   list(APPEND plugin_list org.commontk.log4qt)
 endif()
+
+list(APPEND plugin_list ${blueberry_core_plugin_list})
+list(APPEND plugin_list ${blueberry_ui_plugin_list})
 
 foreach(_plugin ${plugin_list})
   ctk_plugin_option(${_plugin} "Build the ${_plugin} plugin." ON)
@@ -1053,6 +1076,7 @@ endforeach()
 #
 include(Utilities/KWStyle/KWStyle.cmake)
 
+
 #---------------------------------------------------------------------------
 # Documentation
 #
@@ -1064,3 +1088,7 @@ include(Utilities/KWStyle/KWStyle.cmake)
 # This directory is typically the last SUBDIRS in the main CMakeLists.txt.
 add_subdirectory(CMake/LastConfigureStep)
 add_subdirectory(Utilities/mbilog)
+
+if(DEFINED Qt5_DIR)
+  set(MITK_USE_Qt5 TRUE)
+endif()
