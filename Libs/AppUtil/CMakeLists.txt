@@ -1,5 +1,9 @@
 project(CTKAppUtil)
 
+#find_package(  itkCommon REQUIRED)
+#find_package(  qtsingleapplication  REQUIRED)
+#find_package(  mitkCore  REQUIRED)
+
 include (GenerateExportHeader)
 include(FeatureSummary)
 
@@ -63,3 +67,5 @@ generate_export_header(${PROJECT_NAME}
   EXPORT_MACRO_NAME MITKAPPUTIL_EXPORT
   EXPORT_FILE_NAME MitkAppUtilExports.h
   )
+
+#target_link_libraries(${PROJECT_NAME} PUBLIC mitkCore qtsingleapplication )

@@ -1,10 +1,8 @@
 set(target_libraries
-  #CppMicroServices
-  #CppMicroServices_LIBRARIES
-  #ITK_LIBRARIES
   CTKCore
   CTKPluginFramework
-  #CTKmitkCore
+  itkCommon
+  mitkCore
   qtsingleapplication
   Poco::Util
   )
