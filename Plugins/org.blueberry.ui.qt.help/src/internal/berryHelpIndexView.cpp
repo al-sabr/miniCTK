@@ -1,32 +1,20 @@
-/*===================================================================
+/*============================================================================
 
-BlueBerry Platform
+The Medical Imaging Interaction Toolkit (MITK)
 
-Copyright (c) German Cancer Research Center,
-Division of Medical and Biological Informatics.
+Copyright (c) German Cancer Research Center (DKFZ)
 All rights reserved.
 
-This software is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.
+Use of this source code is governed by a 3-clause BSD license that can be
+found in the LICENSE file.
 
-See LICENSE.txt or http://www.mitk.org for details.
-
-===================================================================*/
-
-#ifdef __MINGW32__
-// We need to inlclude winbase.h here in order to declare
-// atomic intrinsics like InterlockedIncrement correctly.
-// Otherwhise, they would be declared wrong within qatomic_windows.h .
-#include <windows.h>
-#endif
+============================================================================*/
 
 #include "berryHelpIndexView.h"
 
 #include "berryHelpPluginActivator.h"
 #include "berryHelpEditor.h"
 #include "berryHelpEditorInput.h"
-#include "berryHelpWebView.h"
 #include "berryQHelpEngineWrapper.h"
 #include "berryHelpTopicChooser.h"
 
@@ -298,7 +286,6 @@ void HelpIndexView::open(HelpIndexWidget* indexWidget, const QModelIndex &index)
       return;
     }
 
-    //if (!HelpWebView::canOpenPage(url.path()))
     IEditorInput::Pointer input(new HelpEditorInput(url));
     this->GetSite()->GetPage()->OpenEditor(input, HelpEditor::EDITOR_ID);
   }

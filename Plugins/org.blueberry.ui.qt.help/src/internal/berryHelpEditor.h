@@ -1,18 +1,14 @@
-/*===================================================================
+/*============================================================================
 
-BlueBerry Platform
+The Medical Imaging Interaction Toolkit (MITK)
 
-Copyright (c) German Cancer Research Center,
-Division of Medical and Biological Informatics.
+Copyright (c) German Cancer Research Center (DKFZ)
 All rights reserved.
 
-This software is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.
+Use of this source code is governed by a 3-clause BSD license that can be
+found in the LICENSE file.
 
-See LICENSE.txt or http://www.mitk.org for details.
-
-===================================================================*/
+============================================================================*/
 
 #ifndef BERRYHELPEDITOR_H_
 #define BERRYHELPEDITOR_H_
@@ -23,7 +19,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <berryQtEditorPart.h>
 
 class QToolBar;
-class QWebPage;
+class QWebEnginePage;
 
 namespace berry {
 
@@ -40,7 +36,7 @@ public:
   static const QString EDITOR_ID;
 
   HelpEditor();
-  ~HelpEditor();
+  ~HelpEditor() override;
 
   void Init(berry::IEditorSite::Pointer site, berry::IEditorInput::Pointer input) override;
 
@@ -51,7 +47,7 @@ public:
   bool IsDirty() const override { return false; }
   bool IsSaveAsAllowed() const override { return false; }
 
-  QWebPage* GetQWebPage() const;
+  QWebEnginePage* GetQWebPage() const;
 
   IPartListener::Events::Types GetPartEventTypes() const override;
   void PartDeactivated(const IWorkbenchPartReference::Pointer& /*partRef*/) override;
@@ -85,7 +81,7 @@ private Q_SLOTS:
 
 private:
 
-  bool findInWebPage(const QString& ttf, bool forward);
+  void findInWebPage(const QString& ttf, bool forward);
 
   void enableShortcuts();
   void disableShortcuts();
@@ -95,7 +91,7 @@ private:
   Q_DISABLE_COPY(HelpEditor)
 
   QToolBar* m_ToolBar;
-  HelpWebView* m_WebView;
+  HelpWebView* m_WebEngineView;
   HelpEditorFindWidget* m_FindWidget;
 
   QAction* m_BackAction;
@@ -106,7 +102,6 @@ private:
   QAction* m_OpenHelpMode;
   QAction* m_CloseHelpMode;
   QAction* m_HomeAction;
-  QAction* m_PrintAction;
 };
 
 } // end namespace berry

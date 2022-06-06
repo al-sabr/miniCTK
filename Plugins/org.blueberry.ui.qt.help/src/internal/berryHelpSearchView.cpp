@@ -1,25 +1,14 @@
-/*===================================================================
+/*============================================================================
 
-BlueBerry Platform
+The Medical Imaging Interaction Toolkit (MITK)
 
-Copyright (c) German Cancer Research Center,
-Division of Medical and Biological Informatics.
+Copyright (c) German Cancer Research Center (DKFZ)
 All rights reserved.
 
-This software is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.
+Use of this source code is governed by a 3-clause BSD license that can be
+found in the LICENSE file.
 
-See LICENSE.txt or http://www.mitk.org for details.
-
-===================================================================*/
-
-#ifdef __MINGW32__
-// We need to inlclude winbase.h here in order to declare
-// atomic intrinsics like InterlockedIncrement correctly.
-// Otherwhise, they would be declared wrong within qatomic_windows.h .
-#include <windows.h>
-#endif
+============================================================================*/
 
 #include "berryHelpSearchView.h"
 
@@ -85,6 +74,7 @@ void HelpSearchView::CreateQtPartControl(QWidget* parent)
     QTextBrowser* browser = m_ResultWidget->findChild<QTextBrowser*>();
     if (browser) // Will be null if QtHelp was configured not to use CLucene.
     {
+      browser->document()->setDefaultStyleSheet(QStringLiteral("body { background-color: white; }"));
       browser->viewport()->installEventFilter(this);
       browser->setContextMenuPolicy(Qt::CustomContextMenu);
       connect(browser, SIGNAL(customContextMenuRequested(QPoint)),

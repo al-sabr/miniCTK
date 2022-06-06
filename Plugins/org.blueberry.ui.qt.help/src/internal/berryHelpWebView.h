@@ -1,18 +1,14 @@
-/*===================================================================
+/*============================================================================
 
-BlueBerry Platform
+The Medical Imaging Interaction Toolkit (MITK)
 
-Copyright (c) German Cancer Research Center,
-Division of Medical and Biological Informatics.
+Copyright (c) German Cancer Research Center (DKFZ)
 All rights reserved.
 
-This software is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.
+Use of this source code is governed by a 3-clause BSD license that can be
+found in the LICENSE file.
 
-See LICENSE.txt or http://www.mitk.org for details.
-
-===================================================================*/
+============================================================================*/
 
 
 #ifndef BERRYHELPWEBVIEW_H
@@ -21,31 +17,32 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <QFont>
 #include <QAction>
 
-#include <QWebView>
+#include <QWebEnginePage>
+#include <QWebEngineView>
 
 #include <berryIEditorSite.h>
 
+class QWebEngineUrlSchemeHandler;
 
 namespace berry {
 
 class QHelpEngineWrapper;
 
-class HelpWebView : public QWebView
+class HelpWebView : public QWebEngineView
 {
   Q_OBJECT
 
 public:
   explicit HelpWebView(IEditorSite::Pointer editorSite, QWidget *parent, qreal zoom = 0.0);
-  ~HelpWebView();
+  ~HelpWebView() override;
 
   QFont viewerFont() const;
   void setViewerFont(const QFont &font);
 
-  qreal scale() const { return textSizeMultiplier(); }
+  qreal scale() const { return this->zoomFactor(); }
 
   bool handleForwardBackwardMouseButtons(QMouseEvent *e);
 
-  QUrl source() const;
   void setSource(const QUrl &url);
 
   inline QString documentTitle() const
@@ -55,12 +52,12 @@ public:
   { return !selectedText().isEmpty(); } // ### this is suboptimal
 
   inline void copy()
-  { return triggerPageAction(QWebPage::Copy); }
+  { return triggerPageAction(QWebEnginePage::Copy); }
 
   inline bool isForwardAvailable() const
-  { return pageAction(QWebPage::Forward)->isEnabled(); }
+  { return pageAction(QWebEnginePage::Forward)->isEnabled(); }
   inline bool isBackwardAvailable() const
-  { return pageAction(QWebPage::Back)->isEnabled(); }
+  { return pageAction(QWebEnginePage::Back)->isEnabled(); }
   inline bool hasLoadFinished() const
   { return m_LoadFinished; }
 
@@ -68,13 +65,13 @@ public:
   static bool canOpenPage(const QString &url);
   static bool isLocalUrl(const QUrl &url);
   static bool launchWithExternalApp(const QUrl &url);
+  static const QString m_MissingContextMessage;
   static const QString m_PageNotFoundMessage;
 
 public Q_SLOTS:
 
   void backward() { back(); }
   void home();
-  void print();
 
   void scaleUp();
   void scaleDown();
@@ -89,9 +86,7 @@ Q_SIGNALS:
   void printRequested();
 
 protected:
-  virtual void wheelEvent(QWheelEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *e) override;
-  void mousePressEvent(QMouseEvent *event) override;
+  void wheelEvent(QWheelEvent *) override;
 
 private Q_SLOTS:
   void actionChanged();
@@ -102,6 +97,7 @@ private:
 
   bool m_LoadFinished;
   QHelpEngineWrapper& m_HelpEngine;
+  QWebEngineUrlSchemeHandler* m_HelpSchemeHandler;
 };
 
 }
