@@ -588,6 +588,10 @@ mark_as_superbuild(CTK_USE_KWSTYLE)
 ctk_lib_option(Core
                "Build the Core library" ON)
 
+ctk_lib_option(Widgets
+              "Build the Widgets library" OFF
+              CTK_ENABLE_Widgets OR CTK_USE_QTTESTING)
+
 ctk_lib_option(PluginFramework
                "Build the Plugin Framework" OFF
                CTK_ENABLE_PluginFramework)
@@ -664,8 +668,8 @@ set(blueberry_core_plugin_list
 set(blueberry_ui_plugin_list
   org.blueberry.ui.qt
   org.blueberry.ui.qt.help
-  #org.blueberry.ui.qt.log
-  #org.blueberry.ui.qt.objectinspector
+  org.blueberry.ui.qt.log
+  org.blueberry.ui.qt.objectinspector
   #org.blueberry.uitest
   )
 
