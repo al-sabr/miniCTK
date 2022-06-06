@@ -11,24 +11,23 @@ set(INTERNAL_CPP_FILES
 
 set(CPP_FILES )
 
-set(MOC_H_FILES
+set(PLUGIN_MOC_SRCS
   src/internal/berryLogView.h
   src/internal/berryQtLogPlugin.h
   src/internal/berryQtLogView.h
   src/internal/berryQtPlatformLogModel.h
 )
 
-set(CACHED_RESOURCE_FILES
+set(PLUGIN_CACHED_RESOURCE_FILES
   plugin.xml
-
-  resources/Logging.png
+  resources/logging.svg
 )
 
-set(QRC_FILES
+set(PLUGIN_resources
   resources/org_blueberry_ui_qt_log.qrc
 )
 
-set(UI_FILES
+set(PLUGIN_UI_FORMS
   src/internal/berryQtLogView.ui
 )
 
@@ -39,3 +38,5 @@ endforeach(file ${SRC_CPP_FILES})
 foreach(file ${INTERNAL_CPP_FILES})
   set(CPP_FILES ${CPP_FILES} src/internal/${file})
 endforeach(file ${INTERNAL_CPP_FILES})
+
+set(PLUGIN_SRCS ${CPP_FILES})
