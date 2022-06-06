@@ -9,22 +9,22 @@ set(INTERNAL_CPP_FILES
   berryQtObjectTableModel.cpp
 )
 
-set(UI_FILES
+set(PLUGIN_UI_FORMS
   src/internal/berryQtObjectBrowserView.ui
 )
 
-set(MOC_H_FILES
+set(PLUGIN_MOC_SRCS
   src/internal/berryObjectBrowserView.h
   src/internal/berryPluginActivator.h
   src/internal/berryQtObjectTableModel.h
 )
 
-set(CACHED_RESOURCE_FILES
+set(PLUGIN_CACHED_RESOURCE_FILES
   plugin.xml
   resources/ObjectBrowser.png
 )
 
-set(RES_FILES
+set(PLUGIN_resources
   resources/blueberry_ui_qt_objectinspector.qrc
 )
 
@@ -38,3 +38,4 @@ foreach(file ${INTERNAL_CPP_FILES})
   set(CPP_FILES ${CPP_FILES} src/internal/${file})
 endforeach(file ${INTERNAL_CPP_FILES})
 
+set(PLUGIN_SRCS ${CPP_FILES})
