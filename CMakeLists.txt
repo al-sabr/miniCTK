@@ -891,6 +891,7 @@ endif()
 set(CTK_DEPENDENCIES
   #Poco
   QtTesting
+  CppMicroServices
   )
 
 if(CTK_USE_KWSTYLE)
