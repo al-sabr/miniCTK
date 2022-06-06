@@ -9,6 +9,10 @@ Use of this source code is governed by a 3-clause BSD license that can be
 found in the LICENSE file.
 
 ============================================================================*/
+#ifdef _WIN32
+#include <windows.h>
+#include <processthreadsapi.h>
+#endif
 
 #include <mitkExceptionMacro.h>
 #include <mitkLog.h>
