@@ -6,6 +6,6 @@
 
 set(target_libraries
   CTKPluginFramework
-  Poco
-  QT_LIBRARIES
+  org_blueberry_core_commands
+  org_blueberry_core_expressions
 )

@@ -1,5 +1,7 @@
 project(org_commontk_configadmin)
 
+find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
+
 set(PLUGIN_export_directive "org_commontk_configadmin_EXPORT")
 
 set(PLUGIN_SRCS
@@ -59,6 +61,7 @@ ctkMacroBuildPlugin(
   TARGET_LIBRARIES ${PLUGIN_target_libraries}
 )
 
+#target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Widgets Qt5::LinguistTools)
 # Testing
 if(BUILD_TESTING)
   add_subdirectory(Testing)

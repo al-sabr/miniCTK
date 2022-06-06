@@ -8,7 +8,7 @@
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
-      http://www.commontk.org/LICENSE
+      http://commontk.org/LICENSE
 
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@
 
 // CTK includes
 #include <ctkLogger.h>
+#include <ctkUtils.h>
 
 // STL includes
 #include <cstdlib>
@@ -42,6 +43,12 @@ int ctkLoggerTest1(int argc, char * argv [] )
   logger.warn("logger.warn");
   logger.error("logger.error");
   logger.fatal("logger.fatal");
+
+  // This should log a warning "Assertion `5 == 6` failed ..."
+  CTK_SOFT_ASSERT(5 == 6);
+
+  // This should not log anything
+  CTK_SOFT_ASSERT(8 == 8);
 
   return EXIT_SUCCESS;
 }

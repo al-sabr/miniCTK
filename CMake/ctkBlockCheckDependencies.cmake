@@ -38,6 +38,11 @@ if(CTK_SUPERBUILD)
   set(ep_common_c_flags "${CMAKE_C_FLAGS_INIT} ${ADDITIONAL_C_FLAGS}")
   set(ep_common_cxx_flags "${CMAKE_CXX_FLAGS_INIT} ${ADDITIONAL_CXX_FLAGS}")
 
+  set(ep_cxx_standard_arg)
+  if(CMAKE_CXX_STANDARD)
+    set(ep_cxx_standard_arg "-DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}")
+  endif()
+
   set(ep_common_cache_args
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
       -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
@@ -47,12 +52,19 @@ if(CTK_SUPERBUILD)
       -DCMAKE_INSTALL_PREFIX:PATH=${ep_install_dir}
       -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
       -DBUILD_TESTING:BOOL=OFF
+      -DCMAKE_MACOSX_RPATH:BOOL=${CMAKE_MACOSX_RPATH}
+      ${ep_cxx_standard_arg}
      )
 endif()
 
 if(NOT DEFINED CTK_DEPENDENCIES)
   message(FATAL_ERROR "error: CTK_DEPENDENCIES variable is not defined !")
 endif()
+
+set(mbilog_enabling_variable mbilog)
+set(${ITK_enabling_variable}_LIBRARY_DIRS mbilog_LIBRARY_DIRS)
+set(${ITK_enabling_variable}_INCLUDE_DIRS mbilog_INCLUDE_DIRS)
+set(${ITK_enabling_variable}_FIND_PACKAGE_CMD mbilog)
 
 set(DCMTK_enabling_variable DCMTK_LIBRARIES)
 set(${DCMTK_enabling_variable}_INCLUDE_DIRS DCMTK_INCLUDE_DIR)

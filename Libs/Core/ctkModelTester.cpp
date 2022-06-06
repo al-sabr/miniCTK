@@ -24,6 +24,7 @@
 
 // CTK includes
 #include "ctkModelTester.h"
+#include "ctkUtils.h"
 
 //-----------------------------------------------------------------------------
 class ctkModelTesterPrivate
@@ -258,7 +259,7 @@ void ctkModelTester::testData(const QModelIndex& index)const
     {
     this->test(index.data(Qt::DisplayRole).isValid(), 
                QString("A valid index can't have invalid data: %1, %2, %3")
-               .arg(index.row()).arg(index.column()).arg(long(index.internalPointer())));
+               .arg(index.row()).arg(index.column()).arg(ptrdiff_t(index.internalPointer())));
     }
 }
 
@@ -292,7 +293,7 @@ void ctkModelTester::testParent(const QModelIndex& vparent)const
     for (int j = 0; j < d->Model->columnCount(vparent); ++j)
       {
       this->test(d->Model->hasIndex(i, j, vparent), "hasIndex should return true for int range {0->rowCount(), 0->columnCount()}");
-      QModelIndex child = vparent.child(i, j);
+      QModelIndex child = ctk::modelChildIndex(d->Model, vparent, i, j);
       this->test(child.row() == i, "A child's row must be the same as given");
       this->test(child.column() == j, "A child's column must be the same as given");
       QModelIndex childParent = child.parent();

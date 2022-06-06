@@ -20,6 +20,8 @@
 
 cmake_minimum_required(VERSION 3.2)
 
+project(CTK)
+
 foreach(p
   CMP0054 # CMake 3.1
   CMP0042
@@ -50,6 +52,7 @@ include(mitkFunctionInstallExternalCMakeProject)
 include(mitkFunctionCreateModule)
 include(mitkFunctionUseModules)
 include(mitkFunctionCheckModuleDependencies)
+include(mitkFunctionOrganizeSources)
 #-----------------------------------------------------------------------------
 if(APPLE)
   # Note: By setting CMAKE_OSX_* variables before any enable_language() or project() calls,
@@ -62,7 +65,7 @@ if(APPLE)
 endif()
 
 #-----------------------------------------------------------------------------
-project(CTK)
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 # Check miminum Mac OS X version
@@ -585,6 +588,10 @@ mark_as_superbuild(CTK_USE_KWSTYLE)
 ctk_lib_option(Core
                "Build the Core library" ON)
 
+ctk_lib_option(Widgets
+              "Build the Widgets library" OFF
+              CTK_ENABLE_Widgets OR CTK_USE_QTTESTING)
+
 ctk_lib_option(PluginFramework
                "Build the Plugin Framework" OFF
                CTK_ENABLE_PluginFramework)
@@ -645,6 +652,28 @@ endforeach()
 set(CTK_ENABLED_APPS ${_enabled_apps} CACHE INTERNAL "" FORCE)
 
 #-----------------------------------------------------------------------------
+# BlueBerry Plugins - none of them is build by default
+#
+
+
+# Plugins in the list below are not build by default
+set(blueberry_core_plugin_list
+  org.blueberry.core.runtime
+  org.blueberry.core.jobs
+  org.blueberry.core.expressions
+  org.blueberry.core.commands
+  #org.blueberry.test
+  )
+
+set(blueberry_ui_plugin_list
+  org.blueberry.ui.qt
+  org.blueberry.ui.qt.help
+  org.blueberry.ui.qt.log
+  org.blueberry.ui.qt.objectinspector
+  #org.blueberry.uitest
+  )
+
+#-----------------------------------------------------------------------------
 # CTK Plugins - none of them is build by default
 #
 
@@ -654,13 +683,14 @@ set(plugin_list
   org.commontk.eventadmin
   org.commontk.log
   org.commontk.metatype
-  org.blueberry.core.runtime
-  org.blueberry.ui.qt
   )
 
 if(CTK_QT_VERSION VERSION_LESS "5")
   list(APPEND plugin_list org.commontk.log4qt)
 endif()
+
+list(APPEND plugin_list ${blueberry_core_plugin_list})
+list(APPEND plugin_list ${blueberry_ui_plugin_list})
 
 foreach(_plugin ${plugin_list})
   ctk_plugin_option(${_plugin} "Build the ${_plugin} plugin." ON)
@@ -699,6 +729,9 @@ endif()
 # three arguments. This expression should only contain build option names
 # which belong to leafs in the required dependency tree.
 
+ctk_enable_option(Widgets "Enable Qt Widget libraries" OFF
+                  CTK_LIB_Widgets)
+                  
 # The CTK Plugin Framework, a dynamic component system based on OSGi.
 # This will enable only the framework itself.
 ctk_enable_option(PluginFramework "Enable Plugin Framework" OFF
@@ -852,7 +885,7 @@ endif()
 # CTK dependencies - Projects should be TOPOLOGICALLY ordered
 #-----------------------------------------------------------------------------
 set(CTK_DEPENDENCIES
-  Poco
+  #Poco
   QtTesting
   )
 
@@ -1052,6 +1085,8 @@ endforeach()
 # Style Checking configuration
 #
 include(Utilities/KWStyle/KWStyle.cmake)
+add_subdirectory(Utilities/mbilog)
+
 
 #---------------------------------------------------------------------------
 # Documentation
@@ -1063,4 +1098,7 @@ include(Utilities/KWStyle/KWStyle.cmake)
 # the end of the whole configuration process, as a "last step".
 # This directory is typically the last SUBDIRS in the main CMakeLists.txt.
 add_subdirectory(CMake/LastConfigureStep)
-add_subdirectory(Utilities/mbilog)
+
+if(DEFINED Qt5_DIR)
+  set(MITK_USE_Qt5 TRUE)
+endif()
