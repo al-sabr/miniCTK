@@ -1,18 +1,14 @@
-/*===================================================================
+/*============================================================================
 
 The Medical Imaging Interaction Toolkit (MITK)
 
-Copyright (c) German Cancer Research Center,
-Division of Medical and Biological Informatics.
+Copyright (c) German Cancer Research Center (DKFZ)
 All rights reserved.
 
-This software is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.
+Use of this source code is governed by a 3-clause BSD license that can be
+found in the LICENSE file.
 
-See LICENSE.txt or http://www.mitk.org for details.
-
-===================================================================*/
+============================================================================*/
 
 #include "QmitkSafeApplication.h"
 
@@ -21,18 +17,17 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkException.h>
 #include <mitkLogMacros.h>
 
-QmitkSafeApplication::QmitkSafeApplication(int& argc, char** argv)
-  : QApplication(argc, argv)
-{}
-
-bool QmitkSafeApplication::notify(QObject* receiver, QEvent* event)
+QmitkSafeApplication::QmitkSafeApplication(int &argc, char **argv, bool safeMode)
+  : QApplication(argc, argv),
+    m_SafeMode(safeMode)
 {
-  if (!m_SafeMode)
-  {
-    return QApplication::notify(receiver, event);
-  }
+}
 
-  return QmitkSafeNotify<QApplication>(this, receiver, event);
+bool QmitkSafeApplication::notify(QObject *receiver, QEvent *event)
+{
+  return m_SafeMode
+    ? QmitkSafeNotify<QApplication>(this, receiver, event)
+    : QApplication::notify(receiver, event);
 }
 
 void QmitkSafeApplication::setSafeMode(bool safeMode)
@@ -44,4 +39,3 @@ bool QmitkSafeApplication::getSafeMode() const
 {
   return m_SafeMode;
 }
-

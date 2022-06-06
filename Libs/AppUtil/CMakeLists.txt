@@ -1,22 +1,27 @@
-project(AppUtil)
+project(CTKAppUtil)
+
+include (GenerateExportHeader)
+include(FeatureSummary)
+
+# Apply properties to the module target.
+add_compile_definitions(${PROJECT_NAME}_EXPORTS)
 
 #
 # See CTK/CMake/ctkMacroBuildLib.cmake for details
 #
+include(files.cmake)
 
 set(KIT_export_directive "MITKAPPUTIL_EXPORT")
 
 
 # Source files
 set(KIT_SRCS
-    src/mitkBaseApplication.cpp
-    src/mitkProvisioningInfo.cpp
-    src/QmitkSafeApplication.cpp
-    src/QmitkSigleApplication.cpp
+    ${CPP_FILES}
   )
 
 # Headers that should run through moc
 set(KIT_MOC_SRCS
+    ${H_FILES}
 )
 
 # UI files
@@ -47,7 +52,14 @@ ctkMacroBuildLib(
   LIBRARY_TYPE ${CTK_LIBRARY_MODE}
   )
 
+include_directories(include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # Testing
 if(BUILD_TESTING)
 #  add_subdirectory(Testing)
 endif()
+
+generate_export_header(${PROJECT_NAME}
+  EXPORT_MACRO_NAME MITKAPPUTIL_EXPORT
+  EXPORT_FILE_NAME MitkAppUtilExports.h
+  )

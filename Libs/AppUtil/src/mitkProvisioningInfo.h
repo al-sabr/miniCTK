@@ -1,42 +1,37 @@
-/*===================================================================
+/*============================================================================
 
-BlueBerry Platform
+The Medical Imaging Interaction Toolkit (MITK)
 
-Copyright (c) German Cancer Research Center,
-Division of Medical and Biological Informatics.
+Copyright (c) German Cancer Research Center (DKFZ)
 All rights reserved.
 
-This software is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.
+Use of this source code is governed by a 3-clause BSD license that can be
+found in the LICENSE file.
 
-See LICENSE.txt or http://www.mitk.org for details.
-
-===================================================================*/
-
+============================================================================*/
 
 #ifndef MITKPROVISIONINGINFO_H
 #define MITKPROVISIONINGINFO_H
 
+#include <QSet>
 #include <QString>
 #include <QStringList>
-#include <QSet>
 #include <QUrl>
 
-namespace mitk {
-
-class ProvisioningInfo
+namespace mitk
 {
-public:
-    ProvisioningInfo(const QString& file);
+  class ProvisioningInfo
+  {
+  public:
+    ProvisioningInfo(const QString &file);
 
     QStringList getPluginDirs() const;
     QList<QUrl> getPluginsToInstall() const;
     QList<QUrl> getPluginsToStart() const;
 
-private:
-
-    enum Keyword {
+  private:
+    enum Keyword
+    {
       UNKNOWN,
       READ,
       INSTALL,
@@ -50,13 +45,12 @@ private:
 
     static const QString intermediateOutDir;
 
-    void readProvisioningFile(const QString& file);
-    QUrl addPluginToInstall(const QString& file);
-    void addPluginToStart(const QString& file);
+    void readProvisioningFile(const QString &file);
+    QUrl addPluginToInstall(const QString &file);
+    void addPluginToStart(const QString &file);
 
-    QString substituteKeywords(const QString& value) const;
-};
-
+    QString substituteKeywords(const QString &value) const;
+  };
 }
 
 #endif // MITKPROVISIONINGINFO_H
