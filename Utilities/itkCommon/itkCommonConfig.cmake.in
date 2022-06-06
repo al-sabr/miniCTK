@@ -1,6 +1,6 @@
 
 set(itkCommon_IS_ENABLED "1")
-set(itkCommon_INCLUDE_DIRS ${itkCommon_INCLUDE_DIRS} @CMAKE_CURRENT_SOURCE_DIR@ @CMAKE_CURRENT_BINARY_DIR@)
+#set(itkCommon_INCLUDE_DIRS ${itkCommon_INCLUDE_DIRS} @CMAKE_CURRENT_SOURCE_DIR@ @CMAKE_CURRENT_BINARY_DIR@)
 set(itkCommon_TARGET "itkCommon")
 set(itkCommon_DEPENDS "")
 set(itkCommon_PACKAGE_DEPENDS "")
