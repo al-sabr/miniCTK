@@ -1,5 +1,6 @@
 project(CTKAppUtil)
 
+#find_package(  CppMicroServices REQUIRED)
 #find_package(  itkCommon REQUIRED)
 #find_package(  qtsingleapplication  REQUIRED)
 #find_package(  mitkCore  REQUIRED)
