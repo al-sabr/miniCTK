@@ -890,6 +890,10 @@ endif()
 #-----------------------------------------------------------------------------
 set(CTK_DEPENDENCIES
   #Poco
+  mbilog
+  itkCommon
+  qtsingleapplication
+  mitkCore
   QtTesting
   CppMicroServices
   )
@@ -1090,11 +1094,6 @@ endforeach()
 # Style Checking configuration
 #
 include(Utilities/KWStyle/KWStyle.cmake)
-add_subdirectory(Utilities/mbilog)
-add_subdirectory(Utilities/qtsingleapplication)
-add_subdirectory(Utilities/itkCommon)
-add_subdirectory(Utilities/mitkCore)
-
 
 #---------------------------------------------------------------------------
 # Documentation

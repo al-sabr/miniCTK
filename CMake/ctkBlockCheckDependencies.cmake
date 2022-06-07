@@ -61,11 +61,6 @@ if(NOT DEFINED CTK_DEPENDENCIES)
   message(FATAL_ERROR "error: CTK_DEPENDENCIES variable is not defined !")
 endif()
 
-set(mbilog_enabling_variable mbilog)
-set(${ITK_enabling_variable}_LIBRARY_DIRS mbilog_LIBRARY_DIRS)
-set(${ITK_enabling_variable}_INCLUDE_DIRS mbilog_INCLUDE_DIRS)
-set(${ITK_enabling_variable}_FIND_PACKAGE_CMD mbilog)
-
 set(DCMTK_enabling_variable DCMTK_LIBRARIES)
 set(${DCMTK_enabling_variable}_INCLUDE_DIRS DCMTK_INCLUDE_DIR)
 set(${DCMTK_enabling_variable}_FIND_PACKAGE_CMD DCMTK)
@@ -121,6 +116,26 @@ set(CppMicroServices_enabling_variable CppMicroServices_LIBRARIES)
 set(${CppMicroServices_enabling_variable}_LIBRARY_DIRS CppMicroServices_LIBRARY_DIRS)
 set(${CppMicroServices_enabling_variable}_INCLUDE_DIRS CppMicroServices_INCLUDE_DIRS)
 set(${CppMicroServices_enabling_variable}_FIND_PACKAGE_CMD CppMicroServices)
+
+set(mbilog_enabling_variable mbilog_LIBRARIES)
+set(${mbilog_enabling_variable}_LIBRARY_DIRS mbilog_LIBRARY_DIRS)
+set(${mbilog_enabling_variable}_INCLUDE_DIRS mbilog_INCLUDE_DIRS)
+set(${mbilog_enabling_variable}_FIND_PACKAGE_CMD mbilog)
+
+set(itkCommon_enabling_variable itkCommon_LIBRARIES)
+set(${itkCommon_enabling_variable}_LIBRARY_DIRS itkCommon_LIBRARY_DIRS)
+set(${itkCommon_enabling_variable}_INCLUDE_DIRS itkCommon_INCLUDE_DIRS)
+set(${itkCommon_enabling_variable}_FIND_PACKAGE_CMD itkCommon)
+
+set(qtsingleapplication_enabling_variable qtsingleapplication_LIBRARIES)
+set(${qtsingleapplication_enabling_variable}_LIBRARY_DIRS qtsingleapplication_LIBRARY_DIRS)
+set(${qtsingleapplication_enabling_variable}_INCLUDE_DIRS qtsingleapplication_INCLUDE_DIRS)
+set(${qtsingleapplication_enabling_variable}_FIND_PACKAGE_CMD qtsingleapplication)
+
+set(mitkCore_enabling_variable mitkCore_LIBRARIES)
+set(${mitkCore_enabling_variable}_LIBRARY_DIRS mitkCore_LIBRARY_DIRS)
+set(${mitkCore_enabling_variable}_INCLUDE_DIRS mitkCore_INCLUDE_DIRS)
+set(${mitkCore_enabling_variable}_FIND_PACKAGE_CMD mitkCore)
 
 macro(superbuild_is_external_project_includable possible_proj output_var)
   if(DEFINED ${possible_proj}_enabling_variable)

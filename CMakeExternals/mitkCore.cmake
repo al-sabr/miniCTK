@@ -1,8 +1,8 @@
 #
-# CppMicroServices
+# mitkCore
 #
 
-set(proj CppMicroServices)
+set(proj mitkCore)
 
 set(${proj}_DEPENDENCIES "")
 
@@ -14,18 +14,18 @@ ExternalProject_Include_Dependencies(${proj}
   )
 
 if(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
-  unset(CppMicroServices_DIR CACHE)
-  find_package(CppMicroServices REQUIRED NO_MODULE)
+  unset(mitkCore_DIR CACHE)
+  find_package(mitkCore REQUIRED NO_MODULE)
 endif()
 
 # Sanity checks
-if(DEFINED CppMicroServices_DIR AND NOT EXISTS ${CppMicroServices_DIR})
-  message(FATAL_ERROR "CppMicroServices_DIR variable is defined but corresponds to non-existing directory")
+if(DEFINED mitkCore_DIR AND NOT EXISTS ${mitkCore_DIR})
+  message(FATAL_ERROR "mitkCore_DIR variable is defined but corresponds to non-existing directory")
 endif()
 
-if(NOT DEFINED CppMicroServices_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
+if(NOT DEFINED mitkCore_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
-  set(revision_tag "v2.1.1")
+  set(revision_tag "main")
   if(${proj}_REVISION_TAG)
     set(revision_tag ${${proj}_REVISION_TAG})
   endif()
@@ -37,7 +37,7 @@ if(NOT DEFINED CppMicroServices_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${p
     set(location_args GIT_REPOSITORY ${${proj}_GIT_REPOSITORY}
                       GIT_TAG ${revision_tag})
   else()
-    set(location_args GIT_REPOSITORY "${EP_GIT_PROTOCOL}://github.com/CppMicroServices/CppMicroServices"
+    set(location_args GIT_REPOSITORY "${EP_GIT_PROTOCOL}://github.com/al-sabr/mitkCore"
                       GIT_TAG ${revision_tag})
   endif()
 
@@ -55,22 +55,21 @@ if(NOT DEFINED CppMicroServices_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${p
     ${location_args}
     INSTALL_COMMAND ""
     CMAKE_CACHE_ARGS
+      -DitkCommon_DIR:STRING=${itkCommon_DIR}
+      -Dmbilog_DIR:STRING=${mbilog_DIR}
+      -DmitkCore_DIR:STRING=${CMAKE_BINARY_DIR}/${proj}
       ${ep_common_cache_args}
       ${ep_project_include_arg}
-      -DUS_ENABLE_AUTOLOADING_SUPPORT:BOOL=ON
-      -DUS_ENABLE_THREADING_SUPPORT:BOOL=ON
-      -DUS_NO_DOCUMENTATIONT:BOOL=ON
-      -DCppMicroServices_DIR:STRING=${CMAKE_BINARY_DIR}/${proj}
     DEPENDS
       ${${proj}_DEPENDENCIES}
     )
-  set(CppMicroServices_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
+  set(mitkCore_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
 else()
   ExternalProject_Add_Empty(${proj} DEPENDS ${${proj}_DEPENDENCIES})
 endif()
 
 mark_as_superbuild(
-  VARS CppMicroServices_DIR:PATH
+  VARS mitkCore_DIR:PATH
   LABELS "FIND_PACKAGE"
   )
