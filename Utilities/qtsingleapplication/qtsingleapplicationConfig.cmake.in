@@ -1,9 +1,0 @@
-
-set(qtsingleapplication_IS_ENABLED "1")
-#set(qtsingleapplication_INCLUDE_DIRS @CMAKE_CURRENT_SOURCE_DIR@ @CMAKE_CURRENT_BINARY_DIR@)
-set(qtsingleapplication_TARGET "qtsingleapplication")
-set(qtsingleapplication_DEPENDS "")
-set(qtsingleapplication_PACKAGE_DEPENDS "")
-set(qtsingleapplication_LIBRARY_DIRS "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@")
-
-include("${CMAKE_CURRENT_LIST_DIR}/qtsingleapplicationTargets.cmake")
