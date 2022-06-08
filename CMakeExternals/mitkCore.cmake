@@ -57,7 +57,6 @@ if(NOT DEFINED mitkCore_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
     CMAKE_CACHE_ARGS
       -DitkCommon_DIR:STRING=${itkCommon_DIR}
       -Dmbilog_DIR:STRING=${mbilog_DIR}
-      -DmitkCore_DIR:STRING=${CMAKE_BINARY_DIR}/${proj}
       ${ep_common_cache_args}
       ${ep_project_include_arg}
     DEPENDS
