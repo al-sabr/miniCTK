@@ -1,5 +1,6 @@
 project(CTKPluginFramework)
 
+find_package(Qt5 COMPONENTS Sql REQUIRED)
 #
 # See CTK/CMake/ctkMacroBuildLib.cmake for details
 #
@@ -158,7 +159,7 @@ set(KIT_resources
 ctkFunctionGetTargetLibraries(KIT_target_libraries)
 
 if(CTK_QT_VERSION VERSION_GREATER "4")
-  list(APPEND KIT_target_libraries Qt5::Sql Qt5::Concurrent)
+  list(APPEND KIT_target_libraries Qt5::Sql Qt5::Concurrent Qt5::Sql)
 endif()
 
 # Create a MANIFEST.MF resource for the PluginFramework library,
