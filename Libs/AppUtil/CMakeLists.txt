@@ -1,9 +1,10 @@
 project(CTKAppUtil)
 
-#find_package(  CppMicroServices REQUIRED)
-#find_package(  itkCommon REQUIRED)
-#find_package(  qtsingleapplication  REQUIRED)
-#find_package(  mitkCore  REQUIRED)
+find_package(CppMicroServices REQUIRED NO_MODULE)
+find_package(Qt5 COMPONENTS Core Widgets Gui WebEngineCore WebEngine REQUIRED)
+find_package(itkCommon REQUIRED NO_MODULE)
+find_package(qtsingleapplication REQUIRED NO_MODULE)
+find_package(mitkCore REQUIRED NO_MODULE)
 
 include (GenerateExportHeader)
 include(FeatureSummary)
@@ -41,9 +42,17 @@ set(KIT_resources
 # The following macro will read the target libraries from the file 'target_libraries.cmake'
 ctkFunctionGetTargetLibraries(KIT_target_libraries)
 
-#if(CTK_QT_VERSION VERSION_GREATER "4")
-#  list(APPEND KIT_target_libraries Qt5::Sql Qt5::Concurrent)
-#endif()
+if(CTK_QT_VERSION VERSION_GREATER "4")
+  list(APPEND KIT_target_libraries Qt5::Core Qt5::Widgets Qt5::WebEngineCore Qt5::WebEngine mbilog itkCommon mitkCore qtsingleapplication) #Qt5::WebEngine qtsingleapplication
+  if(UNIX AND NOT APPLE)
+    set(qt5_depends {qt5_depends} X11Extras)
+    list(APPEND target_libraries qt5_depends)
+  endif()
+endif()
+
+if (CTK_QT_VERSION VERSION_LESS "5")
+  list(APPEND KIT_target_libraries QT_LIBRARIES)
+endif()
 
 ctkMacroBuildLib(
   NAME ${PROJECT_NAME}
@@ -69,4 +78,4 @@ generate_export_header(${PROJECT_NAME}
   EXPORT_FILE_NAME MitkAppUtilExports.h
   )
 
-#target_link_libraries(${PROJECT_NAME} PUBLIC mitkCore qtsingleapplication )
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Widgets Qt5::WebEngineCore Qt5::WebEngine)
