@@ -72,6 +72,9 @@ include("${CTK_CMAKE_DIR}/ctkFunctionGetPluginDependencies.cmake")
 include("${CTK_CMAKE_DIR}/ctkMacroSetupPlugins.cmake")
 include("${CTK_CMAKE_DIR}/ctkMacroGenerateMocs.cmake")
 
+#include MITK
+include("${CTK_CMAKE_DIR}/mitkMacroFindDependency.cmake")
+
 if(CMAKE_VERSION VERSION_LESS 3)
   include("${CTK_CMAKE_DIR}/CMakeFindDependencyMacro.cmake")
 else()
@@ -99,6 +102,10 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
   )
 
+# Update the CMake module path
+set(CTK_CMAKE_MODULE_PATH "@CTK_SOURCE_DIR@/CMake")
+list(APPEND CMAKE_MODULE_PATH ${CTK_CMAKE_MODULE_PATH})
+
 # Relative install paths
 set(CTK_INSTALL_BIN_DIR "@CTK_INSTALL_BIN_DIR@")
 set(CTK_INSTALL_INCLUDE_DIR "@CTK_INSTALL_INCLUDE_DIR@")
@@ -123,3 +130,6 @@ SET(CTK_BUILD_TYPE @CTK_BUILD_TYPE_CONFIG@)
 
 # CTK external projects variables
 @CTK_SUPERBUILD_EP_VARS_CONFIG@
+
+set(CppMicroServices_DIR "@CppMicroServices_DIR@")
+mitkMacroFindDependency(CppMicroServices)
