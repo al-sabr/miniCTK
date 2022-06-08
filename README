@@ -1,11 +1,11 @@
 This project is a stripped down version of the Common Toolkit which is including the BlueBerry Framework taken from the Medical Imaging Interaction Toolkit
 
-The Common Toolkit is a community effort to provide support code for medical image analysis,
+The Common Toolkit (CTK) is a community effort to provide support code for medical image analysis,
 surgical navigation, and related projects.
 
 [ctk]: http://commontk.org
 
-The [Medical Imaging Interaction Toolkit][mitk] (MITK) is a free open-source software
+The [edical Imaging Interaction Toolkit (MITK) is a free open-source software
 system for development of interactive medical image processing software.
 
 [mitk]: http://mitk.org
