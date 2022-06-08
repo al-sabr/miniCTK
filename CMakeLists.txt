@@ -588,13 +588,17 @@ mark_as_superbuild(CTK_USE_KWSTYLE)
 ctk_lib_option(Core
                "Build the Core library" ON)
 
+               
+ctk_lib_option(PluginFramework
+              "Build the Plugin Framework" OFF
+              CTK_ENABLE_PluginFramework)
+            
 ctk_lib_option(Widgets
               "Build the Widgets library" OFF
               CTK_ENABLE_Widgets OR CTK_USE_QTTESTING)
 
-ctk_lib_option(PluginFramework
-               "Build the Plugin Framework" OFF
-               CTK_ENABLE_PluginFramework)
+ctk_lib_option(AppUtil
+              "Build the AppLib library port from MITK" ON)
 
 ctk_lib_option(CommandLineModules/Core
 	       "Build the Command Line Module core library" OFF)
@@ -886,7 +890,12 @@ endif()
 #-----------------------------------------------------------------------------
 set(CTK_DEPENDENCIES
   #Poco
+  mbilog
+  itkCommon
+  qtsingleapplication
+  mitkCore
   QtTesting
+  CppMicroServices
   )
 
 if(CTK_USE_KWSTYLE)
@@ -1085,8 +1094,6 @@ endforeach()
 # Style Checking configuration
 #
 include(Utilities/KWStyle/KWStyle.cmake)
-add_subdirectory(Utilities/mbilog)
-
 
 #---------------------------------------------------------------------------
 # Documentation

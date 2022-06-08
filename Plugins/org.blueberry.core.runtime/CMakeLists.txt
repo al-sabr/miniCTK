@@ -9,15 +9,12 @@ set(QT_USE_QTXML 1)
 find_package(Qt5 COMPONENTS Core Gui Widgets Xml)
 find_package(mbilog REQUIRED)
 
-message("mbilog_INCLUDE_DIRS = ${mbilog_INCLUDE_DIRS}")
-
 include_directories(
     src
     src/application
     src/dynamichelpers
     src/internal
     src/registry
-    #${mbilog_INCLUDE_DIRS}
     )
 
 message(STATUS "Blueberry include: ${CMAKE_BINARY_DIR}/CMakeExternals/Install/include")
