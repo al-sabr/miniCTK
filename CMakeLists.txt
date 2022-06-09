@@ -40,19 +40,6 @@ set(EXTERNAL_PROJECT_FILE_PREFIX "")
 include(ExternalProject)
 include(ctkMacroCheckExternalProjectDependency)
 
-include(mitkFunctionGetGccVersion)
-include(mitkFunctionCheckCompilerFlags)
-include(mitkFunctionSuppressWarnings) # includes several functions
-include(mitkMacroEmptyExternalProject)
-include(mitkFunctionGenerateProjectXml)
-include(mitkFunctionEnableBuildConfiguration)
-include(mitkFunctionWhitelists)
-include(mitkFunctionAddExternalProject)
-include(mitkFunctionInstallExternalCMakeProject)
-include(mitkFunctionCreateModule)
-include(mitkFunctionUseModules)
-include(mitkFunctionCheckModuleDependencies)
-include(mitkFunctionOrganizeSources)
 #-----------------------------------------------------------------------------
 if(APPLE)
   # Note: By setting CMAKE_OSX_* variables before any enable_language() or project() calls,
@@ -347,6 +334,21 @@ foreach(file
   CMake/ctkFunctionGetGccVersion.cmake
   CMake/ctkFunctionGetCompilerVisibilityFlags.cmake
   CMake/ctkFunctionCompileSnippets.cmake
+
+  CMake/mitkFunctionGetGccVersion.cmake
+  CMake/mitkFunctionCheckCompilerFlags.cmake
+  CMake/mitkFunctionSuppressWarnings.cmake # includes several functions
+  CMake/mitkMacroEmptyExternalProject.cmake
+  CMake/mitkFunctionGenerateProjectXml.cmake
+  CMake/mitkFunctionEnableBuildConfiguration.cmake
+  CMake/mitkFunctionWhitelists.cmake
+  CMake/mitkFunctionAddExternalProject.cmake
+  CMake/mitkFunctionInstallExternalCMakeProject.cmake
+  CMake/mitkFunctionCreateModule.cmake
+  CMake/mitkFunctionUseModules.cmake
+  CMake/mitkFunctionCheckModuleDependencies.cmake
+  CMake/mitkFunctionOrganizeSources.cmake
+  CMake/mitkFunctionCreateBlueBerryApplication.cmake
   )
   include(${file})
   install(FILES ${file} DESTINATION ${CTK_INSTALL_CMAKE_DIR} COMPONENT Development)
