@@ -121,10 +121,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED 1)
 # However, compile flag checks also need to be done with -std=c++11.
 # The MITK_CXX11_FLAG variable is also used for external projects
 # build during the MITK super-build.
-mitkFunctionCheckCompilerFlags("-std=c++11" MITK_CXX11_FLAG)
+
+#mitkFunctionCheckCompilerFlags("-std=c++11" MITK_CXX11_FLAG)
 if(NOT MITK_CXX11_FLAG)
   # Older gcc compilers use -std=c++0x
-  mitkFunctionCheckCompilerFlags("-std=c++0x" MITK_CXX11_FLAG)
+  #mitkFunctionCheckCompilerFlags("-std=c++0x" MITK_CXX11_FLAG)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -1108,6 +1109,6 @@ include(Utilities/KWStyle/KWStyle.cmake)
 # This directory is typically the last SUBDIRS in the main CMakeLists.txt.
 add_subdirectory(CMake/LastConfigureStep)
 
-if(DEFINED Qt5_DIR)
+if(CTK_QT_VERSION STREQUAL "5")
   set(MITK_USE_Qt5 TRUE)
 endif()

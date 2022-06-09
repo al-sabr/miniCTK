@@ -76,7 +76,7 @@ include("${CTK_CMAKE_DIR}/ctkMacroGenerateMocs.cmake")
 include("${CTK_CMAKE_DIR}/mitkMacroFindDependency.cmake")
 include("${CTK_CMAKE_DIR}/mitkMacroEmptyExternalProject.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionGetGccVersion.cmake")
-include("${CTK_CMAKE_DIR}/mitkFunctionCheckCompilerFlags.cmake")
+#include("${CTK_CMAKE_DIR}/mitkFunctionCheckCompilerFlags.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionSuppressWarnings.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionGenerateProjectXml.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionEnableBuildConfiguration.cmake")
@@ -87,7 +87,7 @@ include("${CTK_CMAKE_DIR}/mitkFunctionCreateModule.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionUseModules.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionCheckModuleDependencies.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionOrganizeSources.cmake")
-include("${CTK_CMAKE_DIR}/mitkFunctionCreateBlueBerryApplication.cmake.cmake")
+include("${CTK_CMAKE_DIR}/mitkFunctionCreateBlueBerryApplication.cmake")
 
 if(CMAKE_VERSION VERSION_LESS 3)
   include("${CTK_CMAKE_DIR}/CMakeFindDependencyMacro.cmake")
@@ -144,6 +144,10 @@ SET(CTK_BUILD_TYPE @CTK_BUILD_TYPE_CONFIG@)
 
 # CTK external projects variables
 @CTK_SUPERBUILD_EP_VARS_CONFIG@
+
+if(CTK_QT_VERSION STREQUAL "5")
+  set(MITK_USE_Qt5 TRUE)
+endif()
 
 set(CppMicroServices_DIR "@CppMicroServices_DIR@")
 mitkMacroFindDependency(CppMicroServices)
