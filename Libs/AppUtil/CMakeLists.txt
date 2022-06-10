@@ -57,17 +57,17 @@ endif()
 ctkMacroBuildLib(
   NAME ${PROJECT_NAME}
   EXPORT_DIRECTIVE ${KIT_export_directive}
-  INCLUDE_DIRECTORIES ${CTK_SUPERBUILD_BINARY_DIR}
   SRCS ${KIT_SRCS}
   MOC_SRCS ${KIT_MOC_SRCS}
   UI_FORMS ${KIT_UI_FORMS}
   TARGET_LIBRARIES ${KIT_target_libraries}
   RESOURCES ${KIT_resources}
   LIBRARY_TYPE ${CTK_LIBRARY_MODE}
+  INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
   )
 
-include_directories(include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # Testing
 if(BUILD_TESTING)
 #  add_subdirectory(Testing)
