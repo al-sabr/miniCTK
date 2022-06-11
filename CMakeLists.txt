@@ -302,6 +302,19 @@ set(${PROJECT_NAME}_PLUGIN_LIBRARIES CACHE INTERNAL "CTK plugins" FORCE)
 set(CTK_CMAKE_DIR ${CTK_SOURCE_DIR}/CMake)
 set(CTK_CMAKE_UTILITIES_DIR ${CTK_SOURCE_DIR}/Utilities/CMake)
 
+set(MITK_SOURCE_DIR "${CTK_SOURCE_DIR}")
+set(MITK_MODULES_PACKAGE_DEPENDS_DIR "${MITK_SOURCE_DIR}/CMake/PackageDepends")
+set(MODULES_PACKAGE_DEPENDS_DIRS "${MITK_MODULES_PACKAGE_DEPENDS_DIR}")
+
+if(DEFINED Qt5_DIR)
+  option(MITK_USE_Qt5 "Use Qt 5 library" ON)
+endif()
+
+if(NOT DEFINED Poco_DIR)
+  option(MITK_USE_Poco "Use Poco library" ON)
+  find_package(Poco CONFIG REQUIRED)
+endif()
+
 #-----------------------------------------------------------------------------
 # CMake function(s) and macro(s)
 #
@@ -1108,7 +1121,3 @@ include(Utilities/KWStyle/KWStyle.cmake)
 # the end of the whole configuration process, as a "last step".
 # This directory is typically the last SUBDIRS in the main CMakeLists.txt.
 add_subdirectory(CMake/LastConfigureStep)
-
-if(CTK_QT_VERSION STREQUAL "5")
-  set(MITK_USE_Qt5 TRUE)
-endif()
