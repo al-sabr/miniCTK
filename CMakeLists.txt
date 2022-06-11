@@ -363,6 +363,15 @@ foreach(file
   CMake/mitkFunctionCheckModuleDependencies.cmake
   CMake/mitkFunctionOrganizeSources.cmake
   CMake/mitkFunctionCreateBlueBerryApplication.cmake
+  CMake/mitkFunctionInstallCTKPlugin.cmake
+  CMake/mitkMacroInstall.cmake
+  CMake/mitkMacroInstallTargets.cmake
+  CMake/mitkFunctionGetLibrarySearchPaths.cmake
+  CMake/mitkFunctionCreateProvisioningFile.cmake
+  CMake/mitkFunctionInstallProvisioningFiles.cmake
+  CMake/mitkFunctionInstallThirdPartyCTKPlugins.cmake
+  CMake/mitkFunctionCreatePlugin.cmake
+  CMake/mitkFunctionCheckModuleDependencies.cmake
   )
   include(${file})
   install(FILES ${file} DESTINATION ${CTK_INSTALL_CMAKE_DIR} COMPONENT Development)
