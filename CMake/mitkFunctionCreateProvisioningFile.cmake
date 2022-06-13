@@ -150,8 +150,13 @@ function(mitkFunctionCreateProvisioningFile)
         endif()
       endif()
 
-      set(plugin_url "${file_url}${_plugin_location}/lib${_plugin_target}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-      set(plugin_url_install "${file_url}@EXECUTABLE_DIR/plugins/lib${_plugin_target}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      # Add little hack to check if the build mode is DEBUG and adjust the path in consequence.
+      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(IF_DEBUG_MODE "/Debug")
+      endif()
+
+      set(plugin_url "${file_url}${_plugin_location}${IF_DEBUG_MODE}/lib${_plugin_target}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set(plugin_url_install "${file_url}@EXECUTABLE_DIR/plugins/${IF_DEBUG_MODE}${_plugin_target}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
       set(out_var "${out_var}START ${plugin_url}\n")
       set(out_var_install "${out_var_install}START ${plugin_url_install}\n")
