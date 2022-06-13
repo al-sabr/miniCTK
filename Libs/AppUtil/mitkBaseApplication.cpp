@@ -675,7 +675,11 @@ namespace mitk
     suffixes << "plugins";
 
 #ifdef Q_OS_WINDOWS
-    suffixes << "bin/plugins";
+    #if defined _DEBUG
+        suffixes << "bin/plugins/Debug";
+    #else
+        suffixes << "bin/plugins";
+    #endif
   #ifdef CMAKE_INTDIR
     suffixes << "bin/" CMAKE_INTDIR "/plugins";
   #endif
