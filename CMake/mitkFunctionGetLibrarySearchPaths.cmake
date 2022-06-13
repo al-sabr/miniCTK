@@ -1,11 +1,20 @@
-macro(_find_package package_name)
-  find_package(${package_name} REQUIRED PATHS ${${package_name}_DIR} PATH_SUFFIXES ${package_name} NO_DEFAULT_PATH NO_MODULE QUIET)
-  if(NOT ${package_name}_FOUND)
-    find_package(${package_name} REQUIRED)
-  endif()
-endmacro()
+#! Helper function that gets all library search paths.
+#!
+#! Usage:
+#!
+#!   mitkFunctionGetLibrarySearchPaths(search_path intermediate_dir [DEBUG|MINSIZEREL|RELWITHDEBINFO])
+#!
+#!
+#! The function creates the variable ${search_path}. The variable intermediate_dir contains
+#! paths that should be added to the search_path but should not be checked for existance,
+#! because the are not yet created. The option DEBUG, MINSIZEREL or RELWITHDEBINFO can be used to indicate that
+#! not the paths for release configuration are requested but the debug, min size release or "release with debug info"
+#! paths.
+#!
 
 function(mitkFunctionGetLibrarySearchPaths search_path intermediate_dir)
+
+  cmake_parse_arguments(PARSE_ARGV 2 GLS "RELEASE;DEBUG;MINSIZEREL;RELWITHDEBINFO" "" "")
 
   set(_dir_candidates
       "${MITK_CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
@@ -20,11 +29,9 @@ function(mitkFunctionGetLibrarySearchPaths search_path intermediate_dir)
         )
   endif()
 
-  # Determine the Qt4/5 library installation prefix
+  # Determine the Qt5 library installation prefix
   set(_qmake_location )
-  if(MITK_USE_Qt4)
-    set(_qmake_location ${QT_QMAKE_EXECUTABLE})
-  elseif(MITK_USE_Qt5 AND TARGET ${Qt5Core_QMAKE_EXECUTABLE})
+  if(MITK_USE_Qt5 AND TARGET ${Qt5Core_QMAKE_EXECUTABLE})
     get_property(_qmake_location TARGET ${Qt5Core_QMAKE_EXECUTABLE}
                  PROPERTY IMPORT_LOCATION)
   endif()
@@ -45,15 +52,31 @@ function(mitkFunctionGetLibrarySearchPaths search_path intermediate_dir)
     if(_qt_install_libs)
       list(APPEND _dir_candidates ${_qt_install_libs})
     endif()
-  elseif(MITK_USE_QT)
+  elseif(MITK_USE_Qt5)
     message(WARNING "The qmake executable could not be found.")
   endif()
 
   get_property(_additional_paths GLOBAL PROPERTY MITK_ADDITIONAL_LIBRARY_SEARCH_PATHS)
 
+  if(TARGET OpenSSL::SSL)
+    if(GLS_DEBUG)
+      get_target_property(_openssl_location OpenSSL::SSL IMPORTED_LOCATION_DEBUG)
+    else()
+      get_target_property(_openssl_location OpenSSL::SSL IMPORTED_LOCATION_RELEASE)
+    endif()
+    if(_openssl_location)
+      get_filename_component(_openssl_location ${_openssl_location} DIRECTORY)
+      set(_openssl_location "${_openssl_location}/../../bin")
+      if(EXISTS ${_openssl_location})
+        get_filename_component(_openssl_location ${_openssl_location} ABSOLUTE)
+        list(APPEND _dir_candidates ${_openssl_location})
+      endif()
+    endif()
+  endif()
+
   if(MITK_USE_HDF5)
-    _find_package(HDF5)
-    get_target_property(_location hdf5 LOCATION)
+    FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED shared)
+    get_target_property(_location hdf5-shared LOCATION)
     get_filename_component(_location ${_location} PATH)
     list(APPEND _additional_paths ${_location})
 
@@ -83,35 +106,41 @@ function(mitkFunctionGetLibrarySearchPaths search_path intermediate_dir)
   # the *_DIR variables. Instead, we should rely on package
   # specific "LIBRARY_DIRS" variables, if they exist.
   if(WIN32)
-    if(SOFA_DIR)
-      list(APPEND _dir_candidates "${SOFA_DIR}/bin")
-    endif()
     list(APPEND _dir_candidates "${ITK_DIR}/bin")
-  else()
-    if(SOFA_DIR)
-      list(APPEND _dir_candidates "${SOFA_DIR}/lib")
-    endif()
   endif()
 
-  if(OpenCV_DIR)
-    set(_opencv_link_directories
-      "${OpenCV_LIB_DIR_DBG}"
-      "${OpenCV_LIB_DIR_OPT}"
-      "${OpenCV_3RDPARTY_LIB_DIR_DBG}"
-      "${OpenCV_3RDPARTY_LIB_DIR_OPT}")
-    list(REMOVE_DUPLICATES _opencv_link_directories)
+  if(MITK_USE_MatchPoint)
     if(WIN32)
-      foreach(_opencv_link_directory ${_opencv_link_directories})
-        list(APPEND _dir_candidates "${_opencv_link_directory}/../bin")
-      endforeach()
+      list(APPEND _dir_candidates "${MatchPoint_DIR}/bin")
     else()
-      list(APPEND _dir_candidates ${_opencv_link_directories})
+      list(APPEND _dir_candidates "${MatchPoint_DIR}/lib")
     endif()
   endif()
 
-  if(MITK_USE_Python)
+  # If OpenCV is built within the MITK superbuild set the binary directory
+  # according to the lib path provided by OpenCV.
+  # In the case where an external OpenCV is provided use the binary directory
+  #  of this OpenCV directory
+  if(MITK_USE_OpenCV)
+    if(WIN32)
+      if (EXISTS ${OpenCV_LIB_PATH})
+        list(APPEND _dir_candidates "${OpenCV_LIB_PATH}/../bin") # OpenCV is built in superbuild
+      else()
+        list(APPEND _dir_candidates "${OpenCV_DIR}/bin") # External OpenCV build is used
+      endif()
+    endif()
+  endif()
+
+  if(MITK_USE_OpenMesh)
+    if(WIN32)
+      list(APPEND _dir_candidates "${MITK_EXTERNAL_PROJECT_PREFIX}")
+    endif()
+  endif()
+
+  if(MITK_USE_Python3)
     list(APPEND _dir_candidates "${CTK_DIR}/CMakeExternals/Install/bin")
-    list(APPEND _dir_candidates "${MITK_EXTERNAL_PROJECT_PREFIX}/lib/python2.7/bin")
+    get_filename_component(_python_dir "${Python3_EXECUTABLE}" DIRECTORY)
+    list(APPEND _dir_candidates "${_python_dir}")
   endif()
 
   if(MITK_USE_TOF_PMDO3 OR MITK_USE_TOF_PMDCAMCUBE OR MITK_USE_TOF_PMDCAMBOARD)
@@ -141,6 +170,27 @@ function(mitkFunctionGetLibrarySearchPaths search_path intermediate_dir)
     list(APPEND _dir_candidates ${MITK_LIBRARY_DIRS})
   endif()
 
+  ###################################################################
+  #get the search paths added by the mitkFunctionAddLibrarySearchPath
+  file(GLOB _additional_path_info_files "${MITK_SUPERBUILD_BINARY_DIR}/MITK-AdditionalLibPaths/*.cmake")
+
+  foreach(_additional_path_info_file ${_additional_path_info_files})
+    get_filename_component(_additional_info_name ${_additional_path_info_file} NAME_WE)
+    include(${_additional_path_info_file})
+    if(GLS_DEBUG)
+      list(APPEND _dir_candidates ${${_additional_info_name}_ADDITIONAL_DEBUG_LIBRARY_SEARCH_PATHS})
+    elseif(GLS_MINSIZEREL)
+      list(APPEND _dir_candidates ${${_additional_info_name}_ADDITIONAL_MINSIZEREL_LIBRARY_SEARCH_PATHS})
+    elseif(GLS_RELWITHDEBINFO)
+      list(APPEND _dir_candidates ${${_additional_info_name}_ADDITIONAL_RELWITHDEBINFO_LIBRARY_SEARCH_PATHS})
+    else() #Release
+      list(APPEND _dir_candidates ${${_additional_info_name}_ADDITIONAL_RELEASE_LIBRARY_SEARCH_PATHS})
+    endif()
+  endforeach(_additional_path_info_file ${_additional_path_info_files})
+
+
+  ###############################################
+  #sanitize all candidates and compile final list
   list(REMOVE_DUPLICATES _dir_candidates)
 
   set(_search_dirs )

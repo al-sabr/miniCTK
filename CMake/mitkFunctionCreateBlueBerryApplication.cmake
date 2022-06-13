@@ -15,7 +15,6 @@
 #!        useful if PLUGINS was not used.
 #! \param LINK_LIBRARIES A list of libraries to be linked with the executable.
 #! \param LIBRARY_DIRS A list of directories to pass through to MITK_INSTALL_TARGETS
-#! \param SHOW_CONSOLE (option) Show the console output window (on Windows).
 #! \param NO_PROVISIONING (option) Do not create provisioning files.
 #! \param NO_INSTALL (option) Do not install this executable
 #!
@@ -25,13 +24,12 @@
 #!   NAME MyApp
 #!   DESCRIPTION "MyApp - New ways to explore medical data"
 #!   EXCLUDE_PLUGINS org.mitk.gui.qt.extapplication
-#!   SHOW_CONSOLE
 #! )
 #! \endcode
 #!
 function(mitkFunctionCreateBlueBerryApplication)
 
-cmake_parse_arguments(_APP "SHOW_CONSOLE;NO_PROVISIONING;NO_INSTALL" "NAME;DESCRIPTION" "SOURCES;PLUGINS;EXCLUDE_PLUGINS;LINK_LIBRARIES;LIBRARY_DIRS" ${ARGN})
+cmake_parse_arguments(_APP "NO_PROVISIONING;NO_INSTALL" "NAME;DESCRIPTION" "SOURCES;PLUGINS;EXCLUDE_PLUGINS;LINK_LIBRARIES;LIBRARY_DIRS" ${ARGN})
 
 if(NOT _APP_NAME)
   message(FATAL_ERROR "NAME argument cannot be empty.")
@@ -84,12 +82,25 @@ if(WIN32)
   set(_app_compile_flags "${_app_compile_flags} -DPOCO_NO_UNWINDOWS -DWIN32_LEAN_AND_MEAN")
 endif()
 
-if(_APP_SHOW_CONSOLE)
+if(MITK_SHOW_CONSOLE_WINDOW)
   add_executable(${_APP_NAME} MACOSX_BUNDLE ${_APP_SOURCES} ${WINDOWS_ICON_RESOURCE_FILE})
 else()
   add_executable(${_APP_NAME} MACOSX_BUNDLE WIN32 ${_APP_SOURCES} ${WINDOWS_ICON_RESOURCE_FILE})
 endif()
-mitk_use_modules(TARGET ${_APP_NAME} MODULES mbilog PACKAGES Poco Qt4|QtCore Qt5|Core)
+
+if(NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "^${CMAKE_SOURCE_DIR}/.*")
+  foreach(MITK_EXTENSION_DIR ${MITK_ABSOLUTE_EXTENSION_DIRS})
+    if("${CMAKE_CURRENT_SOURCE_DIR}/" MATCHES "^${MITK_EXTENSION_DIR}/.*")
+      get_filename_component(MITK_EXTENSION_ROOT_FOLDER "${MITK_EXTENSION_DIR}" NAME)
+      set_property(TARGET ${_APP_NAME} PROPERTY FOLDER "${MITK_EXTENSION_ROOT_FOLDER}/Applications")
+      break()
+    endif()
+  endforeach()
+else()
+  set_property(TARGET ${_APP_NAME} PROPERTY FOLDER "${MITK_ROOT_FOLDER}/Applications")
+endif()
+
+mitk_use_modules(TARGET ${_APP_NAME} MODULES MitkAppUtil)
 
 set_target_properties(${_APP_NAME} PROPERTIES
                       COMPILE_FLAGS "${_app_compile_flags}")
@@ -159,7 +170,9 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_APP_NAME}.ini")
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_APP_NAME}.ini)
 endif()
 
-# Create batch files for Windows platforms
+# Create batch and VS user files for Windows platforms
+include(mitkFunctionCreateWindowsBatchScript)
+
 if(WIN32)
   set(template_name "start${_APP_NAME}.bat.in")
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${template_name}")
@@ -169,6 +182,9 @@ if(WIN32)
         ${BUILD_TYPE})
     endforeach()
   endif()
+  mitkFunctionConfigureVisualStudioUserProjectFile(
+    NAME ${_APP_NAME}
+  )
 endif(WIN32)
 
 # -----------------------------------------------------------------------
@@ -198,7 +214,9 @@ if(NOT _APP_NO_INSTALL)
 
   # On Linux, create a shell script to start a relocatable application
   if(UNIX AND NOT APPLE)
-    install(PROGRAMS "${MITK_SOURCE_DIR}/CMake/RunInstalledApp.sh" DESTINATION "." RENAME ${_APP_NAME}.sh)
+    install(PROGRAMS "${MITK_SOURCE_DIR}/CMake/RunInstalledApp.sh" DESTINATION "." RENAME "${_APP_NAME}.sh")
+  elseif(WIN32)
+    install(PROGRAMS "${MITK_SOURCE_DIR}/CMake/RunInstalledWin32App.bat" DESTINATION "." RENAME "${_APP_NAME}.bat")
   endif()
 
   # Tell cpack the executables that you want in the start menu as links

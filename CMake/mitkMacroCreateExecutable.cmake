@@ -13,7 +13,8 @@
 #!     [PACKAGE_DEPENDS <packages we need, like ITK, VTK, QT>]
 #!     [INCLUDE_DIRS <list of additional include directories>]
 #!     [TARGET_DEPENDS <list of additional dependencies>
-#!     [WARNINGS_AS_ERRORS]
+#!     [WARNINGS_NO_ERRORS]
+#!     [NO_INSTALL]
 #! \endcode
 #!
 #! \param EXECUTABLE_NAME The name for the new executable target
@@ -28,7 +29,7 @@ macro(mitk_create_executable)
      )
 
   set(_macro_multiparams
-      SUBPROJECTS            # list of CDash labels
+      SUBPROJECTS            # list of CDash labels (deprecated)
       INCLUDE_DIRS           # additional include dirs
       DEPENDS                # list of modules this module depends on
       PACKAGE_DEPENDS        # list of "packages" this module depends on (e.g. Qt, VTK, etc.)
@@ -41,7 +42,8 @@ macro(mitk_create_executable)
       NO_INIT                # do not create CppMicroServices initialization code
       NO_FEATURE_INFO        # do not create a feature info by calling add_feature_info()
       NO_BATCH_FILE          # do not create batch files on Windows
-      WARNINGS_AS_ERRORS     # treat all compiler warnings as errors
+      WARNINGS_NO_ERRORS     # do not treat compiler warnings as errors
+      NO_INSTALL
      )
 
   cmake_parse_arguments(EXEC "${_macro_options}" "${_macro_params}" "${_macro_multiparams}" ${ARGN})
@@ -50,15 +52,14 @@ macro(mitk_create_executable)
   if(EXEC_NO_INIT)
     list(APPEND _EXEC_OPTIONS NO_INIT)
   endif()
-  if(EXEC_WARNINGS_AS_ERRORS)
-    list(APPEND _EXEC_OPTIONS WARNINGS_AS_ERRORS)
+  if(EXEC_WARNINGS_NO_ERRORS)
+    list(APPEND _EXEC_OPTIONS WARNINGS_NO_ERRORS)
   endif()
   if(EXEC_NO_FEATURE_INFO)
     list(APPEND _EXEC_OPTIONS NO_FEATURE_INFO)
   endif()
 
   mitk_create_module(${EXEC_UNPARSED_ARGUMENTS}
-                     SUBPROJECTS ${EXEC_SUBPROJECTS}
                      VERSION ${EXEC_VERSION}
                      INCLUDE_DIRS ${EXEC_INCLUDE_DIRS}
                      DEPENDS ${EXEC_DEPENDS}
@@ -73,13 +74,18 @@ macro(mitk_create_executable)
 
   set(EXECUTABLE_IS_ENABLED ${MODULE_IS_ENABLED})
   set(EXECUTABLE_TARGET ${MODULE_TARGET})
-  if(MODULE_IS_ENABLED)
+  if(EXECUTABLE_IS_ENABLED)
+    set_property(GLOBAL APPEND PROPERTY MITK_EXECUTABLE_TARGETS ${EXECUTABLE_TARGET})
+    if(EXEC_NO_INSTALL)
+      set_target_properties(${EXECUTABLE_TARGET} PROPERTIES NO_INSTALL TRUE)
+    endif()
     # Add meta dependencies (e.g. on auto-load modules from depending modules)
     if(TARGET ${CMAKE_PROJECT_NAME}-autoload)
       add_dependencies(${MODULE_TARGET} ${CMAKE_PROJECT_NAME}-autoload)
     endif()
 
-    # Create batch files for Windows platforms
+    # Create batch and VS user files for Windows platforms
+    include(mitkFunctionCreateWindowsBatchScript)
     if(WIN32)
       set(_batch_file_in "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_TARGET}.bat.in")
       if(NOT EXISTS "${_batch_file_in}")
@@ -91,6 +97,9 @@ macro(mitk_create_executable)
         set(_batch_file_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
       endif()
       if(NOT EXEC_NO_BATCH_FILE)
+        if(NOT EXEC_NAME)
+          set(EXEC_NAME ${MODULE_TARGET})
+        endif()
         foreach(BUILD_TYPE debug release)
           mitkFunctionCreateWindowsBatchScript(
               ${_batch_file_in} ${_batch_file_out_dir}/${MODULE_TARGET}_${BUILD_TYPE}.bat
@@ -98,6 +107,9 @@ macro(mitk_create_executable)
              )
         endforeach()
       endif()
+      mitkFunctionConfigureVisualStudioUserProjectFile(
+          NAME ${MODULE_TARGET}
+        )
     endif()
   endif()
 

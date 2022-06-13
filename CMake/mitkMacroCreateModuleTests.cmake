@@ -7,7 +7,7 @@
 #
 macro(MITK_CREATE_MODULE_TESTS)
   cmake_parse_arguments(MODULE_TEST
-                        "US_MODULE;NO_INIT" "EXTRA_DRIVER_INIT;EXTRA_DRIVER_INCLUDE" "EXTRA_DEPENDS;DEPENDS;PACKAGE_DEPENDS" ${ARGN})
+                        "US_MODULE;NO_INIT" "EXTRA_DRIVER_INIT;EXTRA_DRIVER_INCLUDE" "EXTRA_DEPENDS;DEPENDS;PACKAGE_DEPENDS;TARGET_DEPENDS" ${ARGN})
 
   if(BUILD_TESTING AND MODULE_IS_ENABLED)
     include(files.cmake)
@@ -16,6 +16,12 @@ macro(MITK_CREATE_MODULE_TESTS)
     set(TESTDRIVER ${MODULE_NAME}TestDriver)
 
     set(MODULE_TEST_EXTRA_DRIVER_INIT "${MODULE_TEST_EXTRA_DRIVER_INIT}")
+
+    if(MITK_XVFB_TESTING)
+      set(xvfb_run ${MITK_XVFB_TESTING_COMMAND})
+    else()
+      set(xvfb_run )
+    endif()
 
     if(MODULE_TEST_US_MODULE)
       message(WARNING "The US_MODULE argument is deprecated and should be removed")
@@ -38,9 +44,13 @@ macro(MITK_CREATE_MODULE_TESTS)
     mitk_create_executable(${TESTDRIVER}
                            DEPENDS ${MODULE_NAME} ${MODULE_TEST_DEPENDS} ${MODULE_TEST_EXTRA_DEPENDS} MitkTestingHelper
                            PACKAGE_DEPENDS ${MODULE_TEST_PACKAGE_DEPENDS}
-                           SUBPROJECTS ${MODULE_SUBPROJECTS}
+                           TARGET_DEPENDS ${MODULE_TEST_TARGET_DEPENDS}
                            FILES_CMAKE ${_testdriver_file_list}
-                           NO_FEATURE_INFO NO_BATCH_FILE ${_no_init})
+                           NO_FEATURE_INFO
+                           NO_BATCH_FILE
+                           NO_INSTALL
+                           ${_no_init})
+    set_property(TARGET ${EXECUTABLE_TARGET} PROPERTY FOLDER "${MITK_ROOT_FOLDER}/Modules/Tests")
 
     #
     # Now tell CMake which tests should be run. This is done automatically
@@ -48,13 +58,22 @@ macro(MITK_CREATE_MODULE_TESTS)
     # are run for each image in the TESTIMAGES list.
     #
     include(files.cmake)
-    foreach( test ${MODULE_TESTS} )
+    foreach(test ${MODULE_TESTS} ${MODULE_RENDERING_TESTS})
       get_filename_component(TName ${test} NAME_WE)
-      add_test(${TName} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TESTDRIVER} ${TName})
-      # Add labels for CDash subproject support
-      if(MODULE_SUBPROJECTS)
-        set_property(TEST ${TName} PROPERTY LABELS ${MODULE_SUBPROJECTS} MITK)
-      endif()
+      add_test(NAME ${TName} COMMAND ${xvfb_run} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TESTDRIVER} ${TName})
+      mitkFunctionGetLibrarySearchPaths(MITK_RUNTIME_PATH_RELEASE release RELEASE)
+      mitkFunctionGetLibrarySearchPaths(MITK_RUNTIME_PATH_DEBUG debug DEBUG)
+      set(test_env_path ${MITK_RUNTIME_PATH_RELEASE} ${MITK_RUNTIME_PATH_DEBUG} $ENV{PATH})
+      list(REMOVE_DUPLICATES test_env_path)
+      string (REGEX REPLACE "\;" "\\\;" test_env_path "${test_env_path}")
+      set_property(TEST ${TName} PROPERTY ENVIRONMENT "PATH=${test_env_path}" APPEND)
+      set_property(TEST ${TName} PROPERTY SKIP_RETURN_CODE 77)
+    endforeach()
+
+    foreach(test ${MODULE_RENDERING_TESTS})
+      get_filename_component(TName ${test} NAME_WE)
+      set_property(TEST ${TName} APPEND PROPERTY LABELS "Rendering Tests")
+      set_property(TEST ${TName} PROPERTY RUN_SERIAL TRUE)
     endforeach()
 
     set(TEST_TYPES IMAGE SURFACE POINTSET) # add other file types here
@@ -73,11 +92,9 @@ macro(MITK_CREATE_MODULE_TESTS)
              foreach( test ${MODULE_${test_type}_TESTS})
                get_filename_component(TName ${test} NAME_WE)
                get_filename_component(DName ${TEST_DATA_FULL_PATH} NAME)
-               add_test(${TName}_${DName} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TESTDRIVER} ${TName} ${TEST_DATA_FULL_PATH})
-               # Add labels for CDash subproject support
-               if(MODULE_SUBPROJECTS)
-                 set_property(TEST ${TName}_${DName} PROPERTY LABELS ${MODULE_SUBPROJECTS} MITK)
-               endif()
+               add_test(NAME ${TName}_${DName} COMMAND ${xvfb_run} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TESTDRIVER} ${TName} ${TEST_DATA_FULL_PATH})
+               set_property(TEST ${TName}_${DName} PROPERTY ENVIRONMENT "PATH=${test_env_path}" APPEND)
+               set_property(TEST ${TName}_${DName} PROPERTY SKIP_RETURN_CODE 77)
              endforeach()
            else()
              message("!!!!! No such file: ${TEST_DATA_FULL_PATH} !!!!!")

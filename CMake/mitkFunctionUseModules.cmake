@@ -1,42 +1,3 @@
-macro(_mitk_normalize_package_names _package_names_var)
-  set(_package_names_var ${_package_names_var})
-  if(${_package_names_var})
-    set(package_names_normalized )
-    list(REMOVE_DUPLICATES ${_package_names_var})
-    if(NOT DEFINED _has_qt4_dep OR _has_qt4_dep EQUAL -1)
-      list(FIND ${_package_names_var} Qt4 _has_qt4_dep)
-    endif()
-    if(NOT DEFINED _has_qt5_dep OR _has_qt5_dep EQUAL -1)
-      list(FIND ${_package_names_var} Qt5 _has_qt5_dep)
-    endif()
-    foreach(_package_name ${${_package_names_var}})
-      set(${_package_name}_REQUIRED_COMPONENTS )
-      # Special filter for exclusive OR Qt4 / Qt5 dependency
-      if(_package_name STREQUAL "Qt4")
-        if(MITK_USE_Qt4 OR NOT MITK_USE_Qt5)
-          # MITK_USE_Qt4 is ON or both MITK_USE_Qt4 and MITK_USE_Qt5
-          # are OFF. So list Qt4 as a dependency.
-          list(APPEND package_names_normalized ${_package_name})
-        elseif(MITK_USE_Qt5 AND _has_qt5_dep EQUAL -1)
-            # List Qt4 as a dependency only if there is no Qt5 dependency
-            # so the module will not be build because of the missing
-            # MITK_USE_Qt4
-            list(APPEND package_names_normalized ${_package_name})
-        endif()
-      elseif(_package_name STREQUAL "Qt5")
-        if(MITK_USE_Qt5 OR NOT MITK_USE_Qt4)
-          list(APPEND package_names_normalized ${_package_name})
-        elseif(MITK_USE_Qt4 AND _has_qt4_dep EQUAL -1)
-          list(APPEND package_names_normalized ${_package_name})
-        endif()
-      else()
-        list(APPEND package_names_normalized ${_package_name})
-      endif()
-    endforeach()
-    set(${_package_names_var} ${package_names_normalized})
-  endif()
-endmacro()
-
 function(_mitk_parse_package_args)
   set(package_list ${ARGN})
 
@@ -68,16 +29,6 @@ function(_mitk_parse_package_args)
     endif()
   endforeach()
 
-  # Check if both Qt4 and Qt5 packages are specified in one of the
-  # public/private/interface lists
-  set(_package_names ${PUBLIC_PACKAGE_NAMES} ${PRIVATE_PACKAGE_NAMES} ${INTERFACE_PACKAGE_NAMES})
-  list(FIND _package_names Qt4 _has_qt4_dep)
-  list(FIND _package_names Qt5 _has_qt5_dep)
-
-  _mitk_normalize_package_names(PUBLIC_PACKAGE_NAMES)
-  _mitk_normalize_package_names(PRIVATE_PACKAGE_NAMES)
-  _mitk_normalize_package_names(INTERFACE_PACKAGE_NAMES)
-
   # remove duplicates and set package components in parent scope
   foreach(_package_visibility PUBLIC PRIVATE INTERFACE)
     foreach(_package_name ${${_package_visibility}_PACKAGE_NAMES})
@@ -100,6 +51,7 @@ function(_include_package_config pkg_config_file)
   # multiple inclusions of the file in the parent scope
   include(${pkg_config_file})
   set(ALL_INCLUDE_DIRECTORIES ${ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+  set(ALL_LINK_DIRECTORIES ${ALL_LINK_DIRECTORIES} PARENT_SCOPE)
   set(ALL_LIBRARIES ${ALL_LIBRARIES} PARENT_SCOPE)
   set(ALL_COMPILE_DEFINITIONS ${ALL_COMPILE_DEFINITIONS} PARENT_SCOPE)
   set(ALL_COMPILE_OPTIONS ${ALL_COMPILE_OPTIONS} PARENT_SCOPE)
@@ -169,6 +121,7 @@ function(mitk_use_modules)
     foreach(_package_visibility INTERFACE PUBLIC PRIVATE)
     foreach(_package ${${_package_visibility}_PACKAGE_NAMES})
       set(ALL_INCLUDE_DIRECTORIES)
+      set(ALL_LINK_DIRECTORIES)
       set(ALL_LIBRARIES)
       set(ALL_COMPILE_DEFINITIONS)
       set(ALL_COMPILE_OPTIONS)
@@ -186,6 +139,10 @@ function(mitk_use_modules)
         if(ALL_INCLUDE_DIRECTORIES)
           list(REMOVE_DUPLICATES ALL_INCLUDE_DIRECTORIES)
           target_include_directories(${USE_TARGET} SYSTEM ${_package_visibility} ${ALL_INCLUDE_DIRECTORIES})
+        endif()
+        if(ALL_LINK_DIRECTORIES)
+          list(REMOVE_DUPLICATES ALL_LINK_DIRECTORIES)
+          target_link_directories(${USE_TARGET} ${_package_visibility} ${ALL_LINK_DIRECTORIES})
         endif()
         if(ALL_LIBRARIES)
           # Don't remove "duplicats" because ALL_LIBRARIES may be of the form:

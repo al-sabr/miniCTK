@@ -26,8 +26,10 @@
 #!        will be available in the set of include directories of depending plug-ins.
 #! \param MODULE_DEPENDS (optional) A list of Modules this plug-in depends on.
 #! \param PACKAGE_DEPENDS (optional) A list of external packages this plug-in depends on.
+#! \param TARGET_DEPENDS (optional) A list of CMake targets this plug-in depends on.
 #! \param DOXYGEN_TAGFILES (optional) Which external tag files should be available for the plugin documentation
 #! \param MOC_OPTIONS (optional) Additional options to pass to the Qt MOC compiler
+#! \param WARNINGS_NO_ERRORS (optional) Do not handle compiler warnings as errors
 function(mitk_create_plugin)
 
   # options
@@ -35,6 +37,7 @@ function(mitk_create_plugin)
     TEST_PLUGIN # Mark this plug-in as a testing plug-in
     NO_INSTALL  # Don't install this plug-in
     NO_QHP_TRANSFORM
+    WARNINGS_NO_ERRORS
   )
 
   # single value arguments
@@ -47,9 +50,10 @@ function(mitk_create_plugin)
     EXPORTED_INCLUDE_SUFFIXES # (optional) additional public include directories
     MODULE_DEPENDS            # (optional)
     PACKAGE_DEPENDS
+    TARGET_DEPENDS
     DOXYGEN_TAGFILES
     MOC_OPTIONS
-    SUBPROJECTS
+    SUBPROJECTS # deprecated
   )
 
   cmake_parse_arguments(_PLUGIN "${arg_options}" "${arg_single}" "${arg_multiple}" ${ARGN})
@@ -79,6 +83,15 @@ function(mitk_create_plugin)
     endif()
     return()
   endif()
+
+  foreach(_module_dep ${_PLUGIN_MODULE_DEPENDS})
+    if(TARGET ${_module_dep})
+      get_target_property(AUTLOAD_DEP ${_module_dep} MITK_AUTOLOAD_DIRECTORY)
+      if (AUTLOAD_DEP)
+        message(SEND_ERROR "Plugin \"${PROJECT_NAME}\" has an invalid dependency on autoload module \"${_module_dep}\". Check MITK_CREATE_PLUGIN usage for \"${PROJECT_NAME}\".")
+      endif()
+    endif()
+  endforeach()
 
   # -------------- All dependencies are resolved ------------------
 
@@ -195,18 +208,51 @@ function(mitk_create_plugin)
     PACKAGES ${_PLUGIN_PACKAGE_DEPENDS}
   )
 
+  if(_PLUGIN_TARGET_DEPENDS)
+    target_link_libraries(${PLUGIN_TARGET} ${_PLUGIN_TARGET_DEPENDS})
+  endif()
+
   set_property(TARGET ${PLUGIN_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS US_MODULE_NAME=${PLUGIN_TARGET})
   set_property(TARGET ${PLUGIN_TARGET} PROPERTY US_MODULE_NAME ${PLUGIN_TARGET})
 
-  if(MITK_DEFAULT_SUBPROJECTS AND NOT MY_SUBPROJECTS)
-    set(MY_SUBPROJECTS ${MITK_DEFAULT_SUBPROJECTS})
+  if(NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "^${CMAKE_SOURCE_DIR}/.*")
+    foreach(MITK_EXTENSION_DIR ${MITK_ABSOLUTE_EXTENSION_DIRS})
+      if("${CMAKE_CURRENT_SOURCE_DIR}/" MATCHES "^${MITK_EXTENSION_DIR}/.*")
+        get_filename_component(MITK_EXTENSION_ROOT_FOLDER "${MITK_EXTENSION_DIR}" NAME)
+        set_property(TARGET ${PLUGIN_TARGET} PROPERTY FOLDER "${MITK_EXTENSION_ROOT_FOLDER}/Plugins")
+        break()
+      endif()
+    endforeach()
+  else()
+    set_property(TARGET ${PLUGIN_TARGET} PROPERTY FOLDER "${MITK_ROOT_FOLDER}/Plugins")
   endif()
 
-  if(MY_SUBPROJECTS)
-    set_property(TARGET ${PLUGIN_TARGET} PROPERTY LABELS ${MY_SUBPROJECTS})
-    foreach(subproject ${MY_SUBPROJECTS})
-      add_dependencies(${subproject} ${PLUGIN_TARGET})
-    endforeach()
+  set(plugin_c_flags)
+  set(plugin_cxx_flags)
+
+  if(NOT _PLUGIN_WARNINGS_NO_ERRORS)
+    if(MSVC_VERSION)
+      mitkFunctionCheckCAndCXXCompilerFlags("/WX" plugin_c_flags plugin_cxx_flags)
+    else()
+      mitkFunctionCheckCAndCXXCompilerFlags(-Werror plugin_c_flags plugin_cxx_flags)
+      mitkFunctionCheckCAndCXXCompilerFlags("-Wno-error=c++0x-static-nonintegral-init" plugin_c_flags plugin_cxx_flags)
+      mitkFunctionCheckCAndCXXCompilerFlags("-Wno-error=static-member-init" plugin_c_flags plugin_cxx_flags)
+      mitkFunctionCheckCAndCXXCompilerFlags("-Wno-error=unknown-warning" plugin_c_flags plugin_cxx_flags)
+      mitkFunctionCheckCAndCXXCompilerFlags("-Wno-error=gnu" plugin_c_flags plugin_cxx_flags)
+      mitkFunctionCheckCAndCXXCompilerFlags("-Wno-error=cast-function-type" plugin_c_flags plugin_cxx_flags)
+      mitkFunctionCheckCAndCXXCompilerFlags("-Wno-error=inconsistent-missing-override" plugin_c_flags plugin_cxx_flags)
+      mitkFunctionCheckCAndCXXCompilerFlags("-Wno-error=deprecated-declarations" plugin_c_flags plugin_cxx_flags)
+    endif()
+  endif()
+
+  if(plugin_c_flags)
+    string(REPLACE " " ";" plugin_c_flags "${plugin_c_flags}")
+    target_compile_options(${PLUGIN_TARGET} PRIVATE ${plugin_c_flags})
+  endif()
+
+  if(plugin_cxx_flags)
+    string(REPLACE " " ";" plugin_cxx_flags "${plugin_cxx_flags}")
+    target_compile_options(${PLUGIN_TARGET} PRIVATE ${plugin_cxx_flags})
   endif()
 
   if(_PLUGIN_TEST_PLUGIN)
