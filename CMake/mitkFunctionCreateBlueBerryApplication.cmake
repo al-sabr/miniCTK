@@ -88,7 +88,13 @@ else()
   add_executable(${_APP_NAME} MACOSX_BUNDLE WIN32 ${_APP_SOURCES} ${WINDOWS_ICON_RESOURCE_FILE})
 endif()
 
-if(NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "^${CMAKE_SOURCE_DIR}/.*")
+# if there is the double ++ symbols in path then escape those symbols for the regex compilation to succeed.
+set(ESCAPED_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+if(${CMAKE_SOURCE_DIR} MATCHES "\\+\\+")
+  string(REPLACE "++" "\\+\\+" ESCAPED_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+endif()
+
+if(NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "^${ESCAPED_CMAKE_SOURCE_DIR}//.*")
   foreach(MITK_EXTENSION_DIR ${MITK_ABSOLUTE_EXTENSION_DIRS})
     if("${CMAKE_CURRENT_SOURCE_DIR}/" MATCHES "^${MITK_EXTENSION_DIR}/.*")
       get_filename_component(MITK_EXTENSION_ROOT_FOLDER "${MITK_EXTENSION_DIR}" NAME)
