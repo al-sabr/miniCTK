@@ -372,6 +372,7 @@ foreach(file
   CMake/mitkFunctionInstallThirdPartyCTKPlugins.cmake
   CMake/mitkFunctionCreatePlugin.cmake
   CMake/mitkFunctionCheckModuleDependencies.cmake
+  CMake/mitkFunctionConfigureVisualStudioUserProjectFile.cmake
   )
   include(${file})
   install(FILES ${file} DESTINATION ${CTK_INSTALL_CMAKE_DIR} COMPONENT Development)

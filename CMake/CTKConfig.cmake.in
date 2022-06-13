@@ -97,6 +97,7 @@ include("${CTK_CMAKE_DIR}/mitkFunctionCreateProvisioningFile.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionCreatePlugin.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionCheckModuleDependencies.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionInstallThirdPartyCTKPlugins.cmake")
+include("${CTK_CMAKE_DIR}/mitkFunctionConfigureVisualStudioUserProjectFile.cmake")
 
 if(CMAKE_VERSION VERSION_LESS 3)
   include("${CTK_CMAKE_DIR}/CMakeFindDependencyMacro.cmake")
