@@ -302,15 +302,16 @@ set(${PROJECT_NAME}_PLUGIN_LIBRARIES CACHE INTERNAL "CTK plugins" FORCE)
 set(CTK_CMAKE_DIR ${CTK_SOURCE_DIR}/CMake)
 set(CTK_CMAKE_UTILITIES_DIR ${CTK_SOURCE_DIR}/Utilities/CMake)
 
+# MITK necessary configuration variable which are used with functions and macros.
 set(MITK_SOURCE_DIR "${CTK_SOURCE_DIR}")
 set(MITK_MODULES_PACKAGE_DEPENDS_DIR "${MITK_SOURCE_DIR}/CMake/PackageDepends")
 set(MODULES_PACKAGE_DEPENDS_DIRS "${MITK_MODULES_PACKAGE_DEPENDS_DIR}")
 
-if(DEFINED Qt5_DIR)
+if(DEFINED Qt5_DIR AND Qt5_FOUND)
   option(MITK_USE_Qt5 "Use Qt 5 library" ON)
 endif()
 
-if(NOT DEFINED Poco_DIR)
+if(NOT DEFINED Poco_DIR AND Poco_FOUND)
   option(MITK_USE_Poco "Use Poco library" ON)
   find_package(Poco CONFIG REQUIRED)
 endif()
@@ -373,6 +374,7 @@ foreach(file
   CMake/mitkFunctionCreatePlugin.cmake
   CMake/mitkFunctionCheckModuleDependencies.cmake
   CMake/mitkFunctionConfigureVisualStudioUserProjectFile.cmake
+  CMake/mitkFunctionCheckCompilerFlags.cmake
   )
   include(${file})
   install(FILES ${file} DESTINATION ${CTK_INSTALL_CMAKE_DIR} COMPONENT Development)
