@@ -215,7 +215,12 @@ function(mitk_create_plugin)
   set_property(TARGET ${PLUGIN_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS US_MODULE_NAME=${PLUGIN_TARGET})
   set_property(TARGET ${PLUGIN_TARGET} PROPERTY US_MODULE_NAME ${PLUGIN_TARGET})
 
-  if(NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "^${CMAKE_SOURCE_DIR}/.*")
+  # if there is the double ++ symbols in path then escape those symbols for the regex compilation to succeed.
+  set(ESCAPED_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+  if(${CMAKE_SOURCE_DIR} MATCHES "\\+\\+")
+    string(REPLACE "++" "\\+\\+" ESCAPED_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+  endif()
+  if(NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "^${ESCAPED_CMAKE_SOURCE_DIR}/.*")
     foreach(MITK_EXTENSION_DIR ${MITK_ABSOLUTE_EXTENSION_DIRS})
       if("${CMAKE_CURRENT_SOURCE_DIR}/" MATCHES "^${MITK_EXTENSION_DIR}/.*")
         get_filename_component(MITK_EXTENSION_ROOT_FOLDER "${MITK_EXTENSION_DIR}" NAME)
