@@ -98,6 +98,7 @@ include("${CTK_CMAKE_DIR}/mitkFunctionCreatePlugin.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionCheckModuleDependencies.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionInstallThirdPartyCTKPlugins.cmake")
 include("${CTK_CMAKE_DIR}/mitkFunctionConfigureVisualStudioUserProjectFile.cmake")
+include("${CTK_CMAKE_DIR}/mitkFunctionCheckCompilerFlags.cmake")
 
 if(CMAKE_VERSION VERSION_LESS 3)
   include("${CTK_CMAKE_DIR}/CMakeFindDependencyMacro.cmake")
@@ -170,3 +171,20 @@ endif()
 
 set(CppMicroServices_DIR "@CppMicroServices_DIR@")
 mitkMacroFindDependency(CppMicroServices)
+
+set(MITK_USE_BLUEBERRY @MITK_USE_BLUEBERRY@)
+if(MITK_USE_BLUEBERRY)
+
+  set(MITK_PLUGIN_USE_FILE "@MITK_PLUGIN_USE_FILE@")
+  if(MITK_PLUGIN_USE_FILE)
+    if(EXISTS "${MITK_PLUGIN_USE_FILE}")
+      include("${MITK_PLUGIN_USE_FILE}")
+    endif()
+  endif()
+
+  set(MITK_PLUGIN_PROVISIONING_FILE "@MITK_EXTAPP_PROVISIONING_FILE@")
+  set(MITK_PROVISIONING_FILES
+      "${BLUEBERRY_PLUGIN_PROVISIONING_FILE}"
+      "${MITK_PLUGIN_PROVISIONING_FILE}")
+
+endif()
