@@ -71,6 +71,7 @@ include("${CTK_CMAKE_DIR}/ctkFunctionGetTargetDependencies.cmake")
 include("${CTK_CMAKE_DIR}/ctkFunctionGetPluginDependencies.cmake")
 include("${CTK_CMAKE_DIR}/ctkMacroSetupPlugins.cmake")
 include("${CTK_CMAKE_DIR}/ctkMacroGenerateMocs.cmake")
+include("${CTK_CMAKE_DIR}/ctkFunctionGetAllPluginTargets.cmake")
 
 #include MITK
 include("${CTK_CMAKE_DIR}/mitkMacroFindDependency.cmake")
