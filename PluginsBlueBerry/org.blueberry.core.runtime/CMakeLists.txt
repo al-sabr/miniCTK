@@ -17,8 +17,6 @@ include_directories(
     src/registry
     )
 
-message(STATUS "Blueberry include: ${CMAKE_BINARY_DIR}/CMakeExternals/Install/include")
-
 set(PLUGIN_export_directive  "org_blueberry_core_runtime_EXPORT")
 
 set(PLUGIN_SRCS

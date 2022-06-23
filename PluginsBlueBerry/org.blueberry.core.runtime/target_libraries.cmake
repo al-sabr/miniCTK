@@ -5,7 +5,8 @@
 #
 
 set(target_libraries
-  CTKPluginFramework
+CTKPluginFramework
+CTKCore
   Poco
   mbilog
 )
