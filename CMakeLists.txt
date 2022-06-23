@@ -104,6 +104,23 @@ else()
   message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang (Linux or Apple), GCC and MSVC.")
 endif()
 
+#-----------------------------------------------------------------------------
+# MITK Extension Feature
+#-----------------------------------------------------------------------------
+
+set(MITK_EXTENSION_DIRS "" CACHE STRING "")
+
+unset(MITK_ABSOLUTE_EXTENSION_DIRS)
+
+foreach(MITK_EXTENSION_DIR ${MITK_EXTENSION_DIRS})
+  get_filename_component(MITK_ABSOLUTE_EXTENSION_DIR "${MITK_EXTENSION_DIR}" ABSOLUTE)
+  list(APPEND MITK_ABSOLUTE_EXTENSION_DIRS "${MITK_ABSOLUTE_EXTENSION_DIR}")
+endforeach()
+
+set(MITK_DIR_PLUS_EXTENSION_DIRS "${MITK_SOURCE_DIR}" ${MITK_ABSOLUTE_EXTENSION_DIRS})
+
+# Compiler settings for MITK.
+
 if(CMAKE_COMPILER_IS_GNUCXX)
   mitkFunctionGetGccVersion(${CMAKE_CXX_COMPILER} GCC_VERSION)
 else()
@@ -316,6 +333,74 @@ if(NOT DEFINED Poco_DIR AND Poco_FOUND)
   find_package(Poco CONFIG REQUIRED)
 endif()
 
+option(MITK_USE_BLUEBERRY "Build the BlueBerry platform" ON)
+
+if(MITK_USE_Qt5)
+  if(WIN32)
+    set(MITK_QT5_MINIMUM_VERSION 5.12.9)
+  else()
+    set(MITK_QT5_MINIMUM_VERSION 5.12)
+  endif()
+  set(MITK_QT5_COMPONENTS Concurrent OpenGL PrintSupport Script Sql Svg Widgets Xml XmlPatterns WebEngineWidgets UiTools Help LinguistTools)
+  if(APPLE)
+    list(APPEND MITK_QT5_COMPONENTS DBus)
+  elseif(UNIX)
+    list(APPEND MITK_QT5_COMPONENTS X11Extras)
+  endif()
+
+  # Hint at default install locations of Qt
+  if(NOT Qt5_DIR)
+    if(MSVC)
+      set(_dir_candidates "C:/Qt")
+
+      if(CMAKE_GENERATOR MATCHES "^Visual Studio [0-9]+ ([0-9]+)")
+        set(_compilers "msvc${CMAKE_MATCH_1}")
+      elseif(CMAKE_GENERATOR MATCHES "Ninja")
+        include(mitkFunctionGetMSVCVersion)
+        mitkFunctionGetMSVCVersion()
+        if(VISUAL_STUDIO_PRODUCT_NAME MATCHES "^Visual Studio ([0-9]+)")
+          set(_compilers "msvc${CMAKE_MATCH_1}")
+        endif()
+      endif()
+
+      if(_compilers MATCHES "[0-9]+")
+        if (CMAKE_MATCH_0 EQUAL 2022)
+          list(APPEND _compilers "msvc2019" "msvc2017") # Binary compatible
+        elseif (CMAKE_MATCH_0 EQUAL 2019)
+          list(APPEND _compilers "msvc2017") # Binary compatible
+        endif()
+      endif()
+    else()
+      set(_dir_candidates ~/Qt)
+
+      if(APPLE)
+        set(_compilers clang)
+      else()
+        list(APPEND _dir_candidates /opt/Qt)
+        set(_compilers gcc)
+      endif()
+    endif()
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      foreach(_compiler ${_compilers})
+        list(APPEND _compilers64 "${_compiler}_64")
+      endforeach()
+      set(_compilers ${_compilers64})
+    endif()
+
+    foreach(_dir_candidate ${_dir_candidates})
+      get_filename_component(_dir_candidate ${_dir_candidate} REALPATH)
+      foreach(_compiler ${_compilers})
+        set(_glob_expression "${_dir_candidate}/5.*/${_compiler}")
+        file(GLOB _hints ${_glob_expression})
+        list(SORT _hints)
+        list(APPEND MITK_QT5_HINTS ${_hints})
+      endforeach()
+    endforeach()
+  endif()
+
+  find_package(Qt5 ${MITK_QT5_MINIMUM_VERSION} COMPONENTS ${MITK_QT5_COMPONENTS} REQUIRED HINTS ${MITK_QT5_HINTS})
+endif()
 #-----------------------------------------------------------------------------
 # CMake function(s) and macro(s)
 #
@@ -333,6 +418,7 @@ foreach(file
   CMake/ctkMacroCompilePythonScript.cmake
   CMake/ctkMacroGenerateMocs.cmake
   CMake/ctkMacroWrapPythonQt.cmake
+  CMake/ctkMacroSetupPlugins.cmake
   CMake/ctkMacroSetupQt.cmake
   CMake/ctkMacroTargetLibraries.cmake # Import multiple macros
   CMake/ctkFunctionExtractOptionNameAndValue.cmake
@@ -349,7 +435,8 @@ foreach(file
   CMake/ctkFunctionGetGccVersion.cmake
   CMake/ctkFunctionGetCompilerVisibilityFlags.cmake
   CMake/ctkFunctionCompileSnippets.cmake
-
+  CMake/ctkFunctionGetAllPluginTargets.cmake
+  
   CMake/mitkFunctionGetGccVersion.cmake
   CMake/mitkFunctionCheckCompilerFlags.cmake
   CMake/mitkFunctionSuppressWarnings.cmake # includes several functions
@@ -686,24 +773,128 @@ set(CTK_ENABLED_APPS ${_enabled_apps} CACHE INTERNAL "" FORCE)
 #-----------------------------------------------------------------------------
 # BlueBerry Plugins - none of them is build by default
 #
+if(MITK_USE_BLUEBERRY)
+  option(MITK_BUILD_ALL_PLUGINS "Build all MITK BlueBerry plugins" OFF)
+  mark_as_advanced(MITK_BUILD_ALL_PLUGINS)
+endif()
 
+#-----------------------------------------------------------------------------
+# Installation preparation
+#
+# These should be set before any MITK install macros are used
+#-----------------------------------------------------------------------------
 
-# Plugins in the list below are not build by default
-set(blueberry_core_plugin_list
-  org.blueberry.core.runtime
-  org.blueberry.core.jobs
-  org.blueberry.core.expressions
-  org.blueberry.core.commands
-  #org.blueberry.test
+# on macOS all BlueBerry plugins get copied into every
+# application bundle (.app directory) specified here
+if(MITK_USE_BLUEBERRY AND APPLE)
+
+  foreach(MITK_EXTENSION_DIR ${MITK_DIR_PLUS_EXTENSION_DIRS})
+    set(MITK_APPLICATIONS_EXTENSION_DIR "${MITK_EXTENSION_DIR}/Applications")
+    if(EXISTS "${MITK_APPLICATIONS_EXTENSION_DIR}/AppList.cmake")
+      set(MITK_APPS "")
+      include("${MITK_APPLICATIONS_EXTENSION_DIR}/AppList.cmake")
+      foreach(mitk_app ${MITK_APPS})
+        # extract option_name
+        string(REPLACE "^^" "\\;" target_info ${mitk_app})
+        set(target_info_list ${target_info})
+        list(GET target_info_list 1 option_name)
+        list(GET target_info_list 0 app_name)
+        # check if the application is enabled
+        if(${option_name} OR MITK_BUILD_ALL_APPS)
+          set(MACOSX_BUNDLE_NAMES ${MACOSX_BUNDLE_NAMES} ${app_name}) # Commented this part Mitk${app_name})
+        endif()
+      endforeach()
+    endif()
+  endforeach()
+
+endif()
+
+# Qt support
+if(MITK_USE_Qt5)
+  find_package(Qt5Core ${MITK_QT5_MINIMUM_VERSION} REQUIRED) # at least Core required
+  get_target_property(_qmake_exec Qt5::qmake LOCATION)
+  execute_process(COMMAND ${_qmake_exec} -query QT_INSTALL_BINS
+    RESULT_VARIABLE _result
+     OUTPUT_VARIABLE QT_BINARY_DIR
+    ERROR_VARIABLE _error
+  )
+  string(STRIP "${QT_BINARY_DIR}" QT_BINARY_DIR)
+  if(_result OR NOT EXISTS "${QT_BINARY_DIR}")
+    message(FATAL_ERROR "Could not determine Qt binary directory: ${_result} ${QT_BINARY_DIR} ${_error}")
+  endif()
+
+  find_program(QT_HELPGENERATOR_EXECUTABLE
+    NAMES qhelpgenerator qhelpgenerator-qt5 qhelpgenerator5
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
   )
 
-set(blueberry_ui_plugin_list
-  org.blueberry.ui.qt
-  org.blueberry.ui.qt.help
-  org.blueberry.ui.qt.log
-  org.blueberry.ui.qt.objectinspector
-  #org.blueberry.uitest
+  find_program(QT_COLLECTIONGENERATOR_EXECUTABLE
+    NAMES qcollectiongenerator qcollectiongenerator-qt5 qcollectiongenerator5
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
   )
+
+  find_program(QT_ASSISTANT_EXECUTABLE
+    NAMES assistant assistant-qt5 assistant5
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
+  )
+
+  find_program(QT_XMLPATTERNS_EXECUTABLE
+    NAMES xmlpatterns
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
+  )
+
+  mark_as_advanced(QT_HELPGENERATOR_EXECUTABLE
+                   QT_COLLECTIONGENERATOR_EXECUTABLE
+                   QT_ASSISTANT_EXECUTABLE
+                   QT_XMLPATTERNS_EXECUTABLE
+                  )
+
+  if(MITK_USE_BLUEBERRY)
+    option(BLUEBERRY_USE_QT_HELP "Enable support for integrating plugin documentation into Qt Help" ${DOXYGEN_FOUND})
+    mark_as_advanced(BLUEBERRY_USE_QT_HELP)
+
+    # Sanity checks for in-application BlueBerry plug-in help generation
+    if(BLUEBERRY_USE_QT_HELP)
+      set(_force_blueberry_use_qt_help_to_off 0)
+      if(NOT DOXYGEN_FOUND)
+        message("> Forcing BLUEBERRY_USE_QT_HELP to OFF because Doxygen was not found.")
+        set(_force_blueberry_use_qt_help_to_off 1)
+      endif()
+      if(DOXYGEN_FOUND AND DOXYGEN_VERSION VERSION_LESS 1.8.7)
+        message("> Forcing BLUEBERRY_USE_QT_HELP to OFF because Doxygen version 1.8.7 or newer not found.")
+        set(_force_blueberry_use_qt_help_to_off 1)
+      endif()
+
+      if(NOT QT_HELPGENERATOR_EXECUTABLE)
+        message("> Forcing BLUEBERRY_USE_QT_HELP to OFF because QT_HELPGENERATOR_EXECUTABLE is empty.")
+        set(_force_blueberry_use_qt_help_to_off 1)
+      endif()
+
+      if(NOT MITK_USE_Qt5)
+        message("> Forcing BLUEBERRY_USE_QT_HELP to OFF because MITK_USE_Qt5 is OFF.")
+        set(_force_blueberry_use_qt_help_to_off 1)
+      endif()
+
+      if(NOT QT_XMLPATTERNS_EXECUTABLE)
+        message("You have enabled Qt Help support, but QT_XMLPATTERNS_EXECUTABLE is empty")
+        set(_force_blueberry_use_qt_help_to_off 1)
+      endif()
+
+      if(_force_blueberry_use_qt_help_to_off)
+        set(BLUEBERRY_USE_QT_HELP OFF CACHE BOOL "Enable support for integrating plugin documentation into Qt Help" FORCE)
+      endif()
+    endif()
+
+    if(BLUEBERRY_QT_HELP_REQUIRED AND NOT BLUEBERRY_USE_QT_HELP)
+      message(FATAL_ERROR "BLUEBERRY_USE_QT_HELP is required to be set to ON")
+    endif()
+  endif()
+
+endif()
 
 #-----------------------------------------------------------------------------
 # CTK Plugins - none of them is build by default
@@ -720,9 +911,6 @@ set(plugin_list
 if(CTK_QT_VERSION VERSION_LESS "5")
   list(APPEND plugin_list org.commontk.log4qt)
 endif()
-
-list(APPEND plugin_list ${blueberry_core_plugin_list})
-list(APPEND plugin_list ${blueberry_ui_plugin_list})
 
 foreach(_plugin ${plugin_list})
   ctk_plugin_option(${_plugin} "Build the ${_plugin} plugin." ON)
@@ -1133,3 +1321,107 @@ include(Utilities/KWStyle/KWStyle.cmake)
 # the end of the whole configuration process, as a "last step".
 # This directory is typically the last SUBDIRS in the main CMakeLists.txt.
 add_subdirectory(CMake/LastConfigureStep)
+
+# Fix an error triggered by MITK configuration.
+if(EXISTS ${DGraph_EXECUTABLE})
+  message("DGraph binary found and compiled successfully.")
+  set(CTK_DGRAPH_EXECUTABLE ${DGraph_EXECUTABLE})
+endif()
+
+set(MITK_USE_CTK ON)
+
+if(MITK_USE_BLUEBERRY)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/PluginsBlueBerry/PluginList.cmake")
+  # Temporary commenting the white listing.
+  #mitkFunctionWhitelistPlugins(MITK MITK_PLUGINS)
+
+  set(mitk_plugins_fullpath "")
+  foreach(mitk_plugin ${MITK_PLUGINS})
+    list(APPEND mitk_plugins_fullpath PluginsBlueBerry/${mitk_plugin})
+  endforeach()
+
+  set(MITK_PLUGIN_REGEX_LIST "")
+  foreach(MITK_EXTENSION_DIR ${MITK_ABSOLUTE_EXTENSION_DIRS})
+    set(MITK_PLUGINS_EXTENSION_DIR "${MITK_EXTENSION_DIR}/PluginsBlueBerry")
+    if(EXISTS "${MITK_PLUGINS_EXTENSION_DIR}/PluginList.cmake")
+      set(MITK_PLUGINS "")
+      include("${MITK_PLUGINS_EXTENSION_DIR}/PluginList.cmake")
+      foreach(mitk_plugin ${MITK_PLUGINS})
+        list(APPEND mitk_plugins_fullpath "${MITK_PLUGINS_EXTENSION_DIR}/${mitk_plugin}")
+      endforeach()
+    endif()
+  endforeach()
+
+  if(EXISTS ${MITK_PRIVATE_MODULES}/PluginList.cmake)
+    include(${MITK_PRIVATE_MODULES}/PluginList.cmake)
+
+    foreach(mitk_plugin ${MITK_PRIVATE_PLUGINS})
+      list(APPEND mitk_plugins_fullpath ${MITK_PRIVATE_MODULES}/${mitk_plugin})
+    endforeach()
+  endif()
+
+  # Commented because this part of MITK is not imported here.
+  #[[
+  if(MITK_BUILD_EXAMPLES)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/Examples/Plugins/PluginList.cmake")
+    set(mitk_example_plugins_fullpath )
+    foreach(mitk_example_plugin ${MITK_EXAMPLE_PLUGINS})
+      list(APPEND mitk_example_plugins_fullpath Examples/Plugins/${mitk_example_plugin})
+      list(APPEND mitk_plugins_fullpath Examples/Plugins/${mitk_example_plugin})
+    endforeach()
+  endif()
+  ]]
+
+  # Specify which plug-ins belong to this project
+  macro(GetMyTargetLibraries all_target_libraries varname)
+    set(re_ctkplugin_mitk "^org_mitk_[a-zA-Z0-9_]+$")
+    set(re_ctkplugin_bb "^org_blueberry_[a-zA-Z0-9_]+$")
+    set(_tmp_list)
+    list(APPEND _tmp_list ${all_target_libraries})
+    ctkMacroListFilter(_tmp_list re_ctkplugin_mitk re_ctkplugin_bb MITK_PLUGIN_REGEX_LIST OUTPUT_VARIABLE ${varname})
+  endmacro()
+
+  # Get infos about application directories and build options
+  set(mitk_apps_fullpath "")
+  foreach(MITK_EXTENSION_DIR ${MITK_DIR_PLUS_EXTENSION_DIRS})
+    set(MITK_APPLICATIONS_EXTENSION_DIR "${MITK_EXTENSION_DIR}/Applications")
+    if(EXISTS "${MITK_APPLICATIONS_EXTENSION_DIR}/AppList.cmake")
+      set(MITK_APPS "")
+      include("${MITK_APPLICATIONS_EXTENSION_DIR}/AppList.cmake")
+      foreach(mitk_app ${MITK_APPS})
+        # extract option_name
+        string(REPLACE "^^" "\\;" target_info ${mitk_app})
+        set(target_info_list ${target_info})
+        list(GET target_info_list 0 directory_name)
+        list(GET target_info_list 1 option_name)
+        if(${option_name})
+          list(APPEND mitk_apps_fullpath "${MITK_APPLICATIONS_EXTENSION_DIR}/${directory_name}^^${option_name}")
+        endif()
+      endforeach()
+    endif()
+  endforeach()
+
+  #message("mitk_plugins_fullpath = ${mitk_plugins_fullpath}")
+  #message("mitk_apps_fullpath = ${mitk_apps_fullpath}")
+  #message("MITK_BUILD_ALL_PLUGINS = ${MITK_BUILD_ALL_PLUGINS}")
+  #message("CTK_DGRAPH_EXECUTABLE = ${CTK_DGRAPH_EXECUTABLE}")
+  if (mitk_plugins_fullpath)
+    
+    ctkMacroSetupPlugins(${mitk_plugins_fullpath}
+                         BUILD_OPTION_PREFIX MITK_BUILD_
+                         APPS ${mitk_apps_fullpath}
+                         BUILD_ALL ${MITK_BUILD_ALL_PLUGINS}
+                         COMPACT_OPTIONS)
+                         #[[]]
+  endif()
+
+  # Commenting and changing for CTK.
+  #set(MITK_PLUGIN_USE_FILE "${MITK_BINARY_DIR}/MitkPluginUseFile.cmake")
+  set(MITK_PLUGIN_USE_FILE "${CTK_BINARY_DIR}/MitkPluginUseFile.cmake")
+  if(${PROJECT_NAME}_PLUGIN_LIBRARIES)
+    ctkFunctionGeneratePluginUseFile(${MITK_PLUGIN_USE_FILE})
+  else()
+    file(REMOVE ${MITK_PLUGIN_USE_FILE})
+    set(MITK_PLUGIN_USE_FILE )
+  endif()
+endif()
