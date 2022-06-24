@@ -908,6 +908,17 @@ set(plugin_list
   org.commontk.metatype
   )
 
+list(APPEND plugin_list
+  org.blueberry.core.runtime
+  org.blueberry.core.expressions
+  org.blueberry.core.jobs
+
+  org.blueberry.ui.qt
+  org.blueberry.ui.qt.log
+  org.blueberry.ui.qt.objectinspector
+  org.blueberry.ui.qt.help
+)
+
 if(CTK_QT_VERSION VERSION_LESS "5")
   list(APPEND plugin_list org.commontk.log4qt)
 endif()
