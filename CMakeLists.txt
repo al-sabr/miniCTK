@@ -1316,12 +1316,6 @@ include(Utilities/KWStyle/KWStyle.cmake)
 #
 #add_subdirectory( Documentation )
 
-#-----------------------------------------------------------------------------
-# The commands in this directory are intended to be executed as
-# the end of the whole configuration process, as a "last step".
-# This directory is typically the last SUBDIRS in the main CMakeLists.txt.
-add_subdirectory(CMake/LastConfigureStep)
-
 # Fix an error triggered by MITK configuration.
 if(EXISTS ${DGraph_EXECUTABLE})
   message("DGraph binary found and compiled successfully.")
@@ -1425,3 +1419,9 @@ if(MITK_USE_BLUEBERRY)
     set(MITK_PLUGIN_USE_FILE )
   endif()
 endif()
+
+#-----------------------------------------------------------------------------
+# The commands in this directory are intended to be executed as
+# the end of the whole configuration process, as a "last step".
+# This directory is typically the last SUBDIRS in the main CMakeLists.txt.
+add_subdirectory(CMake/LastConfigureStep)
