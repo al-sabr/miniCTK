@@ -1059,9 +1059,6 @@ set(CTKQtTesting_OPTIONAL_DEPENDENCIES)
 if(CTK_LIB_Widgets)
   list(APPEND CTKQtTesting_OPTIONAL_DEPENDENCIES CTKWidgets)
 endif()
-if(CTK_LIB_Visualization/VTK/Widgets)
-  list(APPEND CTKQtTesting_OPTIONAL_DEPENDENCIES CTKVisualizationVTKWidgets)
-endif()
 
 #-----------------------------------------------------------------------------
 # Let's make sure the enabled/disabled libraries, plugins or applications are coherent
@@ -1326,8 +1323,7 @@ set(MITK_USE_CTK ON)
 
 if(MITK_USE_BLUEBERRY)
   include("${CMAKE_CURRENT_SOURCE_DIR}/PluginsBlueBerry/PluginList.cmake")
-  # Temporary commenting the white listing.
-  #mitkFunctionWhitelistPlugins(MITK MITK_PLUGINS)
+  mitkFunctionWhitelistPlugins(MITK MITK_PLUGINS)
 
   set(mitk_plugins_fullpath "")
   foreach(mitk_plugin ${MITK_PLUGINS})
