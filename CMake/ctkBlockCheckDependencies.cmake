@@ -61,51 +61,13 @@ if(NOT DEFINED CTK_DEPENDENCIES)
   message(FATAL_ERROR "error: CTK_DEPENDENCIES variable is not defined !")
 endif()
 
-set(DCMTK_enabling_variable DCMTK_LIBRARIES)
-set(${DCMTK_enabling_variable}_INCLUDE_DIRS DCMTK_INCLUDE_DIR)
-set(${DCMTK_enabling_variable}_FIND_PACKAGE_CMD DCMTK)
-
-set(ITK_enabling_variable ITK_LIBRARIES)
-set(${ITK_enabling_variable}_LIBRARY_DIRS ITK_LIBRARY_DIRS)
-set(${ITK_enabling_variable}_INCLUDE_DIRS ITK_INCLUDE_DIRS)
-set(${ITK_enabling_variable}_FIND_PACKAGE_CMD ITK)
-
 set(Log4Qt_enabling_variable Log4Qt_LIBRARIES)
 set(${Log4Qt_enabling_variable}_INCLUDE_DIRS Log4Qt_INCLUDE_DIRS)
 set(${Log4Qt_enabling_variable}_FIND_PACKAGE_CMD Log4Qt)
 
-set(OpenIGTLink_enabling_variable OpenIGTLink_LIBRARIES)
-set(${OpenIGTLink_enabling_variable}_LIBRARY_DIRS OpenIGTLink_LIBRARY_DIRS)
-set(${OpenIGTLink_enabling_variable}_INCLUDE_DIRS OpenIGTLink_INCLUDE_DIRS)
-set(${OpenIGTLink_enabling_variable}_FIND_PACKAGE_CMD OpenIGTLink)
-
-set(PythonQt_enabling_variable PYTHONQT_LIBRARIES)
-set(${PythonQt_enabling_variable}_INCLUDE_DIRS PYTHONQT_INCLUDE_DIR PYTHON_INCLUDE_DIRS)
-set(${PythonQt_enabling_variable}_FIND_PACKAGE_CMD PythonQt)
-
-set(QtSOAP_enabling_variable QtSOAP_LIBRARIES)
-set(${QtSOAP_enabling_variable}_LIBRARY_DIRS QtSOAP_LIBRARY_DIRS)
-set(${QtSOAP_enabling_variable}_INCLUDE_DIRS QtSOAP_INCLUDE_DIRS)
-set(${QtSOAP_enabling_variable}_FIND_PACKAGE_CMD QtSOAP)
-
 set(QtTesting_enabling_variable QtTesting_LIBRARIES)
 set(${QtTesting_enabling_variable}_INCLUDE_DIRS QtTesting_INCLUDE_DIRS)
 set(${QtTesting_enabling_variable}_FIND_PACKAGE_CMD QtTesting)
-
-set(qxmlrpc_enabling_variable qxmlrpc_LIBRARY)
-set(${qxmlrpc_enabling_variable}_LIBRARY_DIRS qxmlrpc_LIBRARY_DIRS)
-set(${qxmlrpc_enabling_variable}_INCLUDE_DIRS qxmlrpc_INCLUDE_DIRS)
-set(${qxmlrpc_enabling_variable}_FIND_PACKAGE_CMD qxmlrpc)
-
-set(qRestAPI_enabling_variable qRestAPI_LIBRARIES)
-set(${qRestAPI_enabling_variable}_LIBRARY_DIRS qRestAPI_LIBRARY_DIRS)
-set(${qRestAPI_enabling_variable}_INCLUDE_DIRS qRestAPI_INCLUDE_DIRS)
-set(${qRestAPI_enabling_variable}_FIND_PACKAGE_CMD qRestAPI)
-
-set(VTK_enabling_variable VTK_LIBRARIES)
-set(${VTK_enabling_variable}_LIBRARY_DIRS VTK_LIBRARY_DIRS)
-set(${VTK_enabling_variable}_INCLUDE_DIRS VTK_INCLUDE_DIRS)
-set(${VTK_enabling_variable}_FIND_PACKAGE_CMD VTK)
 
 set(ZMQ_enabling_variable ZMQ_LIBRARIES)
 set(${ZMQ_enabling_variable}_LIBRARY_DIRS ZMQ_LIBRARY_DIRS)
