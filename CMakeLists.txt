@@ -911,6 +911,7 @@ set(plugin_list
 list(APPEND plugin_list
   org.blueberry.core.runtime
   org.blueberry.core.expressions
+  org.blueberry.core.commands
   org.blueberry.core.jobs
 
   org.blueberry.ui.qt
@@ -1332,100 +1333,7 @@ endif()
 
 set(MITK_USE_CTK ON)
 
-if(MITK_USE_BLUEBERRY)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/PluginsBlueBerry/PluginList.cmake")
-  mitkFunctionWhitelistPlugins(MITK MITK_PLUGINS)
-
-  set(mitk_plugins_fullpath "")
-  foreach(mitk_plugin ${MITK_PLUGINS})
-    list(APPEND mitk_plugins_fullpath PluginsBlueBerry/${mitk_plugin})
-  endforeach()
-
-  set(MITK_PLUGIN_REGEX_LIST "")
-  foreach(MITK_EXTENSION_DIR ${MITK_ABSOLUTE_EXTENSION_DIRS})
-    set(MITK_PLUGINS_EXTENSION_DIR "${MITK_EXTENSION_DIR}/PluginsBlueBerry")
-    if(EXISTS "${MITK_PLUGINS_EXTENSION_DIR}/PluginList.cmake")
-      set(MITK_PLUGINS "")
-      include("${MITK_PLUGINS_EXTENSION_DIR}/PluginList.cmake")
-      foreach(mitk_plugin ${MITK_PLUGINS})
-        list(APPEND mitk_plugins_fullpath "${MITK_PLUGINS_EXTENSION_DIR}/${mitk_plugin}")
-      endforeach()
-    endif()
-  endforeach()
-
-  if(EXISTS ${MITK_PRIVATE_MODULES}/PluginList.cmake)
-    include(${MITK_PRIVATE_MODULES}/PluginList.cmake)
-
-    foreach(mitk_plugin ${MITK_PRIVATE_PLUGINS})
-      list(APPEND mitk_plugins_fullpath ${MITK_PRIVATE_MODULES}/${mitk_plugin})
-    endforeach()
-  endif()
-
-  # Commented because this part of MITK is not imported here.
-  #[[
-  if(MITK_BUILD_EXAMPLES)
-    include("${CMAKE_CURRENT_SOURCE_DIR}/Examples/Plugins/PluginList.cmake")
-    set(mitk_example_plugins_fullpath )
-    foreach(mitk_example_plugin ${MITK_EXAMPLE_PLUGINS})
-      list(APPEND mitk_example_plugins_fullpath Examples/Plugins/${mitk_example_plugin})
-      list(APPEND mitk_plugins_fullpath Examples/Plugins/${mitk_example_plugin})
-    endforeach()
-  endif()
-  ]]
-
-  # Specify which plug-ins belong to this project
-  macro(GetMyTargetLibraries all_target_libraries varname)
-    set(re_ctkplugin_mitk "^org_mitk_[a-zA-Z0-9_]+$")
-    set(re_ctkplugin_bb "^org_blueberry_[a-zA-Z0-9_]+$")
-    set(_tmp_list)
-    list(APPEND _tmp_list ${all_target_libraries})
-    ctkMacroListFilter(_tmp_list re_ctkplugin_mitk re_ctkplugin_bb MITK_PLUGIN_REGEX_LIST OUTPUT_VARIABLE ${varname})
-  endmacro()
-
-  # Get infos about application directories and build options
-  set(mitk_apps_fullpath "")
-  foreach(MITK_EXTENSION_DIR ${MITK_DIR_PLUS_EXTENSION_DIRS})
-    set(MITK_APPLICATIONS_EXTENSION_DIR "${MITK_EXTENSION_DIR}/Applications")
-    if(EXISTS "${MITK_APPLICATIONS_EXTENSION_DIR}/AppList.cmake")
-      set(MITK_APPS "")
-      include("${MITK_APPLICATIONS_EXTENSION_DIR}/AppList.cmake")
-      foreach(mitk_app ${MITK_APPS})
-        # extract option_name
-        string(REPLACE "^^" "\\;" target_info ${mitk_app})
-        set(target_info_list ${target_info})
-        list(GET target_info_list 0 directory_name)
-        list(GET target_info_list 1 option_name)
-        if(${option_name})
-          list(APPEND mitk_apps_fullpath "${MITK_APPLICATIONS_EXTENSION_DIR}/${directory_name}^^${option_name}")
-        endif()
-      endforeach()
-    endif()
-  endforeach()
-
-  #message("mitk_plugins_fullpath = ${mitk_plugins_fullpath}")
-  #message("mitk_apps_fullpath = ${mitk_apps_fullpath}")
-  #message("MITK_BUILD_ALL_PLUGINS = ${MITK_BUILD_ALL_PLUGINS}")
-  #message("CTK_DGRAPH_EXECUTABLE = ${CTK_DGRAPH_EXECUTABLE}")
-  if (mitk_plugins_fullpath)
-    
-    ctkMacroSetupPlugins(${mitk_plugins_fullpath}
-                         BUILD_OPTION_PREFIX MITK_BUILD_
-                         APPS ${mitk_apps_fullpath}
-                         BUILD_ALL ${MITK_BUILD_ALL_PLUGINS}
-                         COMPACT_OPTIONS)
-                         #[[]]
-  endif()
-
-  # Commenting and changing for CTK.
-  #set(MITK_PLUGIN_USE_FILE "${MITK_BINARY_DIR}/MitkPluginUseFile.cmake")
-  set(MITK_PLUGIN_USE_FILE "${CTK_BINARY_DIR}/MitkPluginUseFile.cmake")
-  if(${PROJECT_NAME}_PLUGIN_LIBRARIES)
-    ctkFunctionGeneratePluginUseFile(${MITK_PLUGIN_USE_FILE})
-  else()
-    file(REMOVE ${MITK_PLUGIN_USE_FILE})
-    set(MITK_PLUGIN_USE_FILE )
-  endif()
-endif()
+#include(mitk.cmake)
 
 #-----------------------------------------------------------------------------
 # The commands in this directory are intended to be executed as
